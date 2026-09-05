@@ -57,11 +57,13 @@ app.include_router(artwork.router, prefix=f"{settings.API_V1_STR}/artwork", tags
 app.include_router(catalog.router, prefix=f"{settings.API_V1_STR}/catalog", tags=["Viewer Catalog"])
 app.include_router(catalog.router, prefix=f"{settings.API_V1_STR}/admin/catalog", tags=["Admin Catalog Publishing"])
 app.include_router(validation.router, prefix=f"{settings.API_V1_STR}/admin/validation", tags=["Admin Validation"])
+app.include_router(validation.router, prefix=f"{settings.API_V1_STR}/admin/validation-report", tags=["Admin Validation Spec"])
 
 # Also mount at root for direct browser / REST access
 app.include_router(catalog.router, prefix="/catalog", tags=["Viewer Catalog Direct"])
 app.include_router(catalog.router, prefix="/admin/catalog", tags=["Admin Catalog Direct"])
 app.include_router(validation.router, prefix="/admin/validation", tags=["Admin Validation Direct"])
+app.include_router(validation.router, prefix="/admin/validation-report", tags=["Admin Validation Report Direct"])
 
 @app.get("/")
 def root():

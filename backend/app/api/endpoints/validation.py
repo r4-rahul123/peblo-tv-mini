@@ -7,7 +7,10 @@ from app.schemas.schemas import ValidationReport
 
 router = APIRouter()
 
+@router.get("", response_model=ValidationReport)
+@router.get("/", response_model=ValidationReport)
 @router.get("/report", response_model=ValidationReport)
+@router.get("/validation-report", response_model=ValidationReport)
 async def get_validation_report(
     db: AsyncSession = Depends(get_db),
     user: CurrentUser = Depends(require_editor)

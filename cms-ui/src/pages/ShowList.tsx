@@ -13,15 +13,20 @@ export const ShowList: React.FC<ShowListProps> = ({ onSelectShow, onCreateShow }
   const [search, setSearch] = useState('');
   const [sectionFilter, setSectionFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [languageFilter, setLanguageFilter] = useState('');
+  const [page, setPage] = useState(1);
 
   const { data: shows = [], isLoading, isError } = useQuery<Show[]>({
-    queryKey: ['shows', search, sectionFilter, statusFilter],
+    queryKey: ['shows', search, sectionFilter, statusFilter, languageFilter, page],
     queryFn: async () => {
       const res = await api.get('/shows/', {
         params: {
           q: search || undefined,
           section: sectionFilter || undefined,
           status: statusFilter || undefined,
+          language: languageFilter || undefined,
+          limit: 20,
+          offset: (page - 1) * 20,
         },
       });
       return res.data;
@@ -44,7 +49,7 @@ export const ShowList: React.FC<ShowListProps> = ({ onSelectShow, onCreateShow }
         </button>
       </div>
 
-      <div className='grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-900/60 p-3 rounded-xl border border-slate-800'>
+      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-slate-900/60 p-3 rounded-xl border border-slate-800'>
         <div className='relative'>
           <Search className='w-4 h-4 text-slate-400 absolute left-3 top-2.5' />
           <input
@@ -79,6 +84,19 @@ export const ShowList: React.FC<ShowListProps> = ({ onSelectShow, onCreateShow }
           <option value='published'>Published</option>
           <option value='draft'>Draft</option>
         </select>
+
+        <select
+          value={languageFilter}
+          onChange={(e) => setLanguageFilter(e.target.value)}
+          className='bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-amber-500'
+        >
+          <option value=''>All Languages</option>
+          <option value='English'>English</option>
+          <option value='Hindi'>Hindi</option>
+          <option value='Tamil'>Tamil</option>
+          <option value='Telugu'>Telugu</option>
+          <option value='Bengali'>Bengali</option>
+        </select>
       </div>
 
       {isLoading ? (
@@ -86,48 +104,68 @@ export const ShowList: React.FC<ShowListProps> = ({ onSelectShow, onCreateShow }
       ) : isError ? (
         <div className='p-8 text-center bg-red-950/20 border border-red-900 rounded-xl text-red-300'>Failed to load shows.</div>
       ) : (
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5'>
-          {shows.map((show) => {
-            const totalEpisodes = show.seasons?.reduce((acc, s) => acc + (s.episodes?.length || 0), 0) || 0;
-            return (
-              <div key={show.id} className='bg-slate-900/80 border border-slate-800 rounded-xl overflow-hidden hover:border-slate-700 transition-all flex flex-col justify-between group shadow-lg'>
-                <div>
-                  <div className='relative h-36 bg-slate-950 overflow-hidden'>
-                    {show.banner_url ? (
-                      <img src={show.banner_url} alt={show.title} className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-300' />
-                    ) : show.poster_url ? (
-                      <img src={show.poster_url} alt={show.title} className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-300' />
-                    ) : (
-                      <div className='w-full h-full flex items-center justify-center bg-slate-950 text-slate-600'><Film className='w-8 h-8' /></div>
-                    )}
-                    <div className='absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent' />
-                    <div className='absolute top-3 right-3'>
-                      <span className={'text-[11px] font-semibold px-2.5 py-0.5 rounded-full border shadow-sm ' + (show.status === 'published' ? 'bg-emerald-950/80 text-emerald-300 border-emerald-700/80' : 'bg-amber-950/80 text-amber-300 border-amber-700/80')}>
-                        {show.status.toUpperCase()}
-                      </span>
+        <div className='space-y-6'>
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5'>
+            {shows.map((show) => {
+              const totalEpisodes = show.seasons?.reduce((acc, s) => acc + (s.episodes?.length || 0), 0) || 0;
+              return (
+                <div key={show.id} className='bg-slate-900/80 border border-slate-800 rounded-xl overflow-hidden hover:border-slate-700 transition-all flex flex-col justify-between group shadow-lg'>
+                  <div>
+                    <div className='relative h-36 bg-slate-950 overflow-hidden'>
+                      {show.banner_url ? (
+                        <img src={show.banner_url} alt={show.title} className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-300' />
+                      ) : show.poster_url ? (
+                        <img src={show.poster_url} alt={show.title} className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-300' />
+                      ) : (
+                        <div className='w-full h-full flex items-center justify-center bg-slate-950 text-slate-600'><Film className='w-8 h-8' /></div>
+                      )}
+                      <div className='absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent' />
+                      <div className='absolute top-3 right-3'>
+                        <span className={'text-[11px] font-semibold px-2.5 py-0.5 rounded-full border shadow-sm ' + (show.status === 'published' ? 'bg-emerald-950/80 text-emerald-300 border-emerald-700/80' : 'bg-amber-950/80 text-amber-300 border-amber-700/80')}>
+                          {show.status.toUpperCase()}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className='p-4 space-y-2'>
+                      <h3 className='font-bold text-base text-white line-clamp-1'>{show.title}</h3>
+                      <p className='text-xs text-slate-400 line-clamp-2 leading-relaxed'>{show.synopsis || 'No synopsis provided.'}</p>
+                      <div className='pt-2 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800/60'>
+                        <span className='flex items-center space-x-1'><Layers className='w-3.5 h-3.5 text-amber-500' /><span>{show.seasons?.length || 0} Seasons</span></span>
+                        <span>{totalEpisodes} Episodes</span>
+                        <span className='bg-slate-800 px-1.5 py-0.5 rounded text-[10px] text-slate-300'>{show.category || 'General'}</span>
+                      </div>
                     </div>
                   </div>
 
-                  <div className='p-4 space-y-2'>
-                    <h3 className='font-bold text-base text-white line-clamp-1'>{show.title}</h3>
-                    <p className='text-xs text-slate-400 line-clamp-2 leading-relaxed'>{show.synopsis || 'No synopsis provided.'}</p>
-                    <div className='pt-2 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800/60'>
-                      <span className='flex items-center space-x-1'><Layers className='w-3.5 h-3.5 text-amber-500' /><span>{show.seasons?.length || 0} Seasons</span></span>
-                      <span>{totalEpisodes} Episodes</span>
-                      <span className='bg-slate-800 px-1.5 py-0.5 rounded text-[10px] text-slate-300'>{show.category || 'General'}</span>
-                    </div>
+                  <div className='p-3 bg-slate-950/60 border-t border-slate-800 flex items-center justify-end space-x-2'>
+                    <button onClick={() => onSelectShow(show)} className='px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium transition-colors flex items-center space-x-1.5'>
+                      <Edit3 className='w-3.5 h-3.5' />
+                      <span>Edit Show & Episodes</span>
+                    </button>
                   </div>
                 </div>
+              );
+            })}
+          </div>
 
-                <div className='p-3 bg-slate-950/60 border-t border-slate-800 flex items-center justify-end space-x-2'>
-                  <button onClick={() => onSelectShow(show)} className='px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium transition-colors flex items-center space-x-1.5'>
-                    <Edit3 className='w-3.5 h-3.5' />
-                    <span>Edit Show & Episodes</span>
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+          <div className='flex items-center justify-between bg-slate-900/60 p-4 rounded-xl border border-slate-800'>
+            <button
+              disabled={page === 1}
+              onClick={() => setPage(p => p - 1)}
+              className='px-4 py-2 bg-slate-800 text-slate-200 rounded-lg text-sm font-medium hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+            >
+              Previous
+            </button>
+            <span className='text-sm text-slate-400 font-medium'>Page {page}</span>
+            <button
+              disabled={shows.length < 20}
+              onClick={() => setPage(p => p + 1)}
+              className='px-4 py-2 bg-slate-800 text-slate-200 rounded-lg text-sm font-medium hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
     </div>

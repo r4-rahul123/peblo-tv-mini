@@ -42,6 +42,45 @@
                                └─────────────────────────┘
 ```
 
+### 🩺 Health Endpoint & Production Alerting (Operability)
+
+The backend exposes a dedicated health check and readiness probe at `GET /health` to ensure service operability across the database and storage layers.
+
+- **Endpoint**: `GET /health`
+- **What it checks**:
+  - **Database Connectivity**: Executes a live `SELECT 1` ping using an asynchronous SQLAlchemy session to verify PostgreSQL connection pool health.
+  - **Database Latency**: Measures round-trip query execution time in milliseconds (`latency_ms`).
+  - **Catalogue File Presence**: Validates via the active `StorageProvider` (Local Disk or Cloudflare R2) that `catalog/catalogue.json` exists and is accessible.
+  - **Overall Status**: Returns `"status": "healthy"` if both the database and catalogue checks pass; otherwise returns `"status": "degraded"`.
+
+```json
+// Example GET /health response (200 OK)
+{
+  "status": "healthy",
+  "database": {
+    "connected": true,
+    "latency_ms": 1.85
+  },
+  "catalogue": {
+    "published": true,
+    "path": "catalog/catalogue.json"
+  },
+  "version": "1.0.0"
+}
+```
+
+#### Production Alerting Policies
+Configure automated alerting (via Prometheus, Datadog, or uptime monitoring) for the following conditions:
+1. **Database Connection Failure (`status == "degraded"` or `database.connected == false`)**:
+   - **Severity**: Critical (P1)
+   - **Trigger**: DB ping fails or times out. Immediate alert as backend cannot query or mutate show metadata.
+2. **Missing or Stale Catalogue**:
+   - **Missing Catalogue (`catalogue.published == false`)**: Critical (P1). Immediate alert as viewers will receive empty or broken catalogue responses.
+   - **Stale Catalogue (> 1 hour since last publish)**: Warning (P2). Triggers if no catalogue publication has occurred within expected refresh schedules.
+3. **Database Latency Spike (`database.latency_ms > 500ms`)**:
+   - **Severity**: Warning (P2)
+   - **Trigger**: Database query response latency exceeds 500ms, indicating connection pool contention, unindexed queries, or database resource saturation.
+
 ---
 
 ## 🚀 2. Quick Start & How to Run
@@ -89,6 +128,31 @@ cd viewer-ui
 npm install
 npm run dev -- --port 3000
 ```
+
+### ⚙️ Environment Variables Reference (`.env.example`)
+
+The backend and storage services are configured via environment variables. Copy `.env.example` to `.env` in the project root:
+
+```bash
+cp .env.example .env
+```
+
+| Variable | Default / Example | Description |
+| :--- | :--- | :--- |
+| `PROJECT_NAME` | `Peblo TV Mini API` | Human-readable title for FastAPI metadata and OpenAPI documentation. |
+| `API_V1_STR` | `/api/v1` | URL routing prefix for all version 1 REST API endpoints. |
+| `SECRET_KEY` | `peblo-mini-secret-key-development-mode-only-super-safe` | Cryptographic secret key used for session signing and auth token integrity. |
+| `ALGORITHM` | `HS256` | JWT encoding algorithm. |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | `1440` | Expiration window in minutes for access tokens (defaults to 24h). |
+| `DATABASE_URL` | `postgresql+asyncpg://postgres:hello123@localhost:5433/peblo_db` | Async SQLAlchemy database connection string (PostgreSQL for docker/prod; supports SQLite for local testing). |
+| `STORAGE_BACKEND` | `local` | Storage provider strategy to use: `local` (filesystem storage) or `r2` (Cloudflare R2 / S3-compatible object storage). |
+| `LOCAL_STORAGE_DIR` | `./storage` | Filesystem directory used for storing published catalogues and uploaded artwork when `STORAGE_BACKEND=local`. |
+| `R2_ACCOUNT_ID` | `your-cloudflare-account-id` | Cloudflare R2 Account ID (used to construct S3 endpoint URL). |
+| `R2_ACCESS_KEY_ID` | `your-r2-access-key-id` | Cloudflare R2 / AWS S3 access key ID credential. |
+| `R2_SECRET_ACCESS_KEY` | `your-r2-secret-access-key` | Cloudflare R2 / AWS S3 secret access key credential. |
+| `R2_BUCKET_NAME` | `peblo-tv-mini-catalogue` | Name of the bucket storing catalogue JSON payloads and uploaded artwork assets. |
+| `R2_PUBLIC_URL` | `https://cdn.peblo.tv` | Public CDN domain or URL base for serving published catalogue JSON and media files directly. |
+| `BACKEND_CORS_ORIGINS` | `["http://localhost:3000","http://localhost:3001",...]` | JSON list of allowed origins permitted to make cross-origin requests to the FastAPI backend. |
 
 ---
 
@@ -140,6 +204,8 @@ I implemented an abstract `StorageProvider` base class (`backend/app/services/st
 
 ### 5. What I Left Out & AI Disclosure
 - **AI Tools Used**: I used Google Antigravity / Gemini for rapid boilerplate scaffolding, Pydantic V2 schema validations, and drafting test fixtures.
+  - **Where AI output was ACCEPTED**: AI assistance was accepted for rapid generation of Pydantic schema boilerplate, comprehensive test fixture scaffolding, and initial Tailwind CSS component layouts across the Viewer and CMS frontends.
+  - **Where AI output was REJECTED**: AI suggestions were rejected whenever system correctness, durability, or domain precision were required. Specifically, AI suggested synchronous file I/O for catalogue persistence, which was rejected in favor of an atomic tempfile + `fsync` + `os.replace` rename pattern to prevent corruption during mid-publish process failures; furthermore, AI generated naive string-matching age filters, which were rejected and replaced with numeric range overlap arithmetic to ensure accurate age-appropriate catalog filtering.
 - **Scoping Decisions**:
   1. **Video Streaming Pipeline**: I focused on realistic metadata, thumbnails, durations, and language switching rather than building a heavy HLS/DASH video transcoder.
   2. **1-Click RBAC Role Switcher**: Built into the CMS header (`Editor` ↔ `Admin`) for smooth evaluator DX so reviewers can test permissions in seconds without logging in and out, backed by strict server-side 403 enforcement.
