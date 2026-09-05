@@ -1,0 +1,691 @@
+{
+  "catalog_version": "run-20260905095604-7b4ce9",
+  "published_at": "2026-09-05T09:56:04.835970+00:00",
+  "published_by": "admin@mypeblo.com",
+  "total_shows": 6,
+  "total_episodes": 9,
+  "sections": [
+    {
+      "name": "Bedtime Stories & Calm Down",
+      "section_name": "Bedtime Stories & Calm Down",
+      "shows": [
+        {
+          "id": "show-bedtime-stars",
+          "title": "Bedtime Stars & Lullabies",
+          "synopsis": "Calming Indian bedtime stories, gentle ambient music, and soothing animations to help young minds drift into peaceful sleep.",
+          "section": "Bedtime Stories & Calm Down",
+          "category": "Early Learning",
+          "target_age_group": "2-6",
+          "is_featured": false,
+          "poster_url": "/storage/artwork/bedtime_poster.jpg",
+          "banner_url": "/storage/artwork/bedtime_banner.jpg",
+          "seasons": [
+            {
+              "season_number": 1,
+              "title": "Sweet Dreams in Nature",
+              "episodes": [
+                {
+                  "episode_number": 1,
+                  "content_group": "cg-bed-s1-e1",
+                  "title": "The Sleeping Forest Owl",
+                  "default_title": "The Sleeping Forest Owl",
+                  "default_synopsis": "A soothing tale of how the forest settles down as the moon rises.",
+                  "duration_seconds": 720,
+                  "thumbnail_url": "/storage/artwork/bedtime_thumb_1.jpg",
+                  "default_language": "en",
+                  "available_languages": [
+                    "en",
+                    "hi"
+                  ],
+                  "variants": {
+                    "en": {
+                      "language": "en",
+                      "title": "The Sleeping Forest Owl",
+                      "synopsis": "A soothing tale of how the forest settles down as the moon rises.",
+                      "video_url": "https://cdn.mypeblo.com/videos/bed-s1e1-en.mp4",
+                      "thumbnail_url": "/storage/artwork/bedtime_thumb_1.jpg",
+                      "duration_seconds": 720
+                    },
+                    "hi": {
+                      "language": "hi",
+                      "title": "सोती हुई नन्ही चिड़िया",
+                      "synopsis": "चाँद की मीठी लोरी और शांत वन का खूबसूरत सफर।",
+                      "video_url": "https://cdn.mypeblo.com/videos/bed-s1e1-hi.mp4",
+                      "thumbnail_url": "/storage/artwork/bedtime_thumb_1.jpg",
+                      "duration_seconds": 720
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "trailers": [],
+          "total_episodes": 1
+        }
+      ]
+    },
+    {
+      "name": "Fun Rhymes & Sing Along",
+      "section_name": "Fun Rhymes & Sing Along",
+      "shows": [
+        {
+          "id": "show-rhyme-singalong",
+          "title": "Rhyme Time with Peblo Buddy",
+          "synopsis": "Sing, dance, and learn colors, numbers, letters, and good habits with catchy animated rhymes.",
+          "section": "Fun Rhymes & Sing Along",
+          "category": "Early Learning",
+          "target_age_group": "2-5",
+          "is_featured": false,
+          "poster_url": "/storage/artwork/rhyme_poster.jpg",
+          "banner_url": "/storage/artwork/rhyme_banner.jpg",
+          "seasons": [
+            {
+              "season_number": 1,
+              "title": "Rainbow of Tunes",
+              "episodes": [
+                {
+                  "episode_number": 1,
+                  "content_group": "cg-rhy-s1-e1",
+                  "title": "The Healthy Veggie March",
+                  "default_title": "The Healthy Veggie March",
+                  "default_synopsis": "A lively song making carrots, spinach, and tomatoes super fun!",
+                  "duration_seconds": 180,
+                  "thumbnail_url": "/storage/artwork/rhyme_thumb_1.jpg",
+                  "default_language": "en",
+                  "available_languages": [
+                    "en",
+                    "hi"
+                  ],
+                  "variants": {
+                    "en": {
+                      "language": "en",
+                      "title": "The Healthy Veggie March",
+                      "synopsis": "A lively song making carrots, spinach, and tomatoes super fun!",
+                      "video_url": "https://cdn.mypeblo.com/videos/rhy-s1e1-en.mp4",
+                      "thumbnail_url": "/storage/artwork/rhyme_thumb_1.jpg",
+                      "duration_seconds": 180
+                    },
+                    "hi": {
+                      "language": "hi",
+                      "title": "सब्जियों का गाना",
+                      "synopsis": "गाजर, पालक और मटर का मजेदार और सेहतमंद गीत।",
+                      "video_url": "https://cdn.mypeblo.com/videos/rhy-s1e1-hi.mp4",
+                      "thumbnail_url": "/storage/artwork/rhyme_thumb_1.jpg",
+                      "duration_seconds": 180
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "trailers": [],
+          "total_episodes": 1
+        }
+      ]
+    },
+    {
+      "name": "Learn, Discover & Grow",
+      "section_name": "Learn, Discover & Grow",
+      "shows": [
+        {
+          "id": "show-science-peblo-lab",
+          "title": "Peblo's Cosmic Science Lab",
+          "synopsis": "Join Captain Peblo as we zoom through solar systems, explore gravity, and discover how our earth works!",
+          "section": "Learn, Discover & Grow",
+          "category": "Science & Nature",
+          "target_age_group": "5-10",
+          "is_featured": true,
+          "poster_url": "/storage/artwork/science_poster.jpg",
+          "banner_url": "/storage/artwork/science_banner.jpg",
+          "seasons": [
+            {
+              "season_number": 1,
+              "title": "Space Expeditions",
+              "episodes": [
+                {
+                  "episode_number": 1,
+                  "content_group": "cg-sci-s1-e1",
+                  "title": "Why Does the Moon Change Shape?",
+                  "default_title": "Why Does the Moon Change Shape?",
+                  "default_synopsis": "Learn about the lunar phases in a fun animated demonstration.",
+                  "duration_seconds": 420,
+                  "thumbnail_url": "/storage/artwork/science_thumb_1.jpg",
+                  "default_language": "en",
+                  "available_languages": [
+                    "en",
+                    "hi"
+                  ],
+                  "variants": {
+                    "en": {
+                      "language": "en",
+                      "title": "Why Does the Moon Change Shape?",
+                      "synopsis": "Learn about the lunar phases in a fun animated demonstration.",
+                      "video_url": "https://cdn.mypeblo.com/videos/sci-s1e1-en.mp4",
+                      "thumbnail_url": "/storage/artwork/science_thumb_1.jpg",
+                      "duration_seconds": 420
+                    },
+                    "hi": {
+                      "language": "hi",
+                      "title": "चाँद का आकार क्यों बदलता है?",
+                      "synopsis": "चंद्रमा की कलाओं को सरल और रोचक अंदाज में समझें।",
+                      "video_url": "https://cdn.mypeblo.com/videos/sci-s1e1-hi.mp4",
+                      "thumbnail_url": "/storage/artwork/science_thumb_1.jpg",
+                      "duration_seconds": 420
+                    }
+                  }
+                },
+                {
+                  "episode_number": 3,
+                  "content_group": "cg-sci-s1-e2",
+                  "title": "Gravity: The Invisible Superhero",
+                  "default_title": "Gravity: The Invisible Superhero",
+                  "default_synopsis": "Discover why apples fall down and how astronauts float in orbit.",
+                  "duration_seconds": 450,
+                  "thumbnail_url": "/storage/artwork/science_thumb_2.jpg",
+                  "default_language": "en",
+                  "available_languages": [
+                    "en",
+                    "hi"
+                  ],
+                  "variants": {
+                    "en": {
+                      "language": "en",
+                      "title": "Gravity: The Invisible Superhero",
+                      "synopsis": "Discover why apples fall down and how astronauts float in orbit.",
+                      "video_url": "https://cdn.mypeblo.com/videos/sci-s1e2-en.mp4",
+                      "thumbnail_url": "/storage/artwork/science_thumb_2.jpg",
+                      "duration_seconds": 450
+                    },
+                    "hi": {
+                      "language": "hi",
+                      "title": "गुरुत्वाकर्षण का जादू",
+                      "synopsis": "सेब नीचे क्यों गिरता है और अंतरिक्ष में हम तैरते क्यों हैं?",
+                      "video_url": "https://cdn.mypeblo.com/videos/sci-s1e2-hi.mp4",
+                      "thumbnail_url": "/storage/artwork/science_thumb_2.jpg",
+                      "duration_seconds": 450
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "trailers": [],
+          "total_episodes": 2
+        }
+      ]
+    },
+    {
+      "name": "Peblo Originals & Adventures",
+      "section_name": "Peblo Originals & Adventures",
+      "shows": [
+        {
+          "id": "show-jungle-safari-adventures",
+          "title": "Peblo's Indian Jungle Safari",
+          "synopsis": "Track majestic Bengal tigers, Asiatic lions, and Indian elephants across lush national parks.",
+          "section": "Peblo Originals & Adventures",
+          "category": "Animals & Wildlife",
+          "target_age_group": "5-11",
+          "is_featured": false,
+          "poster_url": "/storage/artwork/jungle_poster.jpg",
+          "banner_url": "/storage/artwork/jungle_banner.jpg",
+          "seasons": [
+            {
+              "season_number": 1,
+              "title": "Wild Tracks of India",
+              "episodes": [
+                {
+                  "episode_number": 1,
+                  "content_group": "cg-jun-s1-e1",
+                  "title": "The Secret of Kaziranga Rhino",
+                  "default_title": "The Secret of Kaziranga Rhino",
+                  "default_synopsis": "Meet the one-horned rhino in Assam's tall grassland.",
+                  "duration_seconds": 540,
+                  "thumbnail_url": "/storage/artwork/jungle_thumb_1.jpg",
+                  "default_language": "en",
+                  "available_languages": [
+                    "en",
+                    "hi"
+                  ],
+                  "variants": {
+                    "en": {
+                      "language": "en",
+                      "title": "The Secret of Kaziranga Rhino",
+                      "synopsis": "Meet the one-horned rhino in Assam's tall grassland.",
+                      "video_url": "https://cdn.mypeblo.com/videos/jun-s1e1-en.mp4",
+                      "thumbnail_url": "/storage/artwork/jungle_thumb_1.jpg",
+                      "duration_seconds": 540
+                    },
+                    "hi": {
+                      "language": "hi",
+                      "title": "काजीरंगा का एक सींग वाला गैंडा",
+                      "synopsis": "असम के घास के मैदानों में गैंडे की खोज।",
+                      "video_url": "https://cdn.mypeblo.com/videos/jun-s1e1-hi.mp4",
+                      "thumbnail_url": "/storage/artwork/jungle_thumb_1.jpg",
+                      "duration_seconds": 540
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "trailers": [],
+          "total_episodes": 1
+        }
+      ]
+    },
+    {
+      "name": "Top Picks for You",
+      "section_name": "Top Picks for You",
+      "shows": [
+        {
+          "id": "show-moti-many-lives",
+          "title": "Moti's Many Lives",
+          "synopsis": "Join Moti the brave street pup as he discovers kindness, courage, and friendship across the vibrant alleys of Varanasi.",
+          "section": "Top Picks for You",
+          "category": "Moral Stories",
+          "target_age_group": "4-8",
+          "is_featured": true,
+          "poster_url": "/storage/artwork/moti_poster.jpg",
+          "banner_url": "/storage/artwork/moti_banner.jpg",
+          "seasons": [
+            {
+              "season_number": 1,
+              "title": "Season 1: Gali Friends",
+              "episodes": [
+                {
+                  "episode_number": 1,
+                  "content_group": "cg-moti-s1-e1",
+                  "title": "The Whispering Banyan Tree",
+                  "default_title": "The Whispering Banyan Tree",
+                  "default_synopsis": "Moti meets a wise old parrot who shares ancient secrets of the town.",
+                  "duration_seconds": 480,
+                  "thumbnail_url": "/storage/artwork/moti_thumb_1.jpg",
+                  "default_language": "en",
+                  "available_languages": [
+                    "en",
+                    "hi"
+                  ],
+                  "variants": {
+                    "en": {
+                      "language": "en",
+                      "title": "The Whispering Banyan Tree",
+                      "synopsis": "Moti meets a wise old parrot who shares ancient secrets of the town.",
+                      "video_url": "https://cdn.mypeblo.com/videos/moti-s1e1-en.mp4",
+                      "thumbnail_url": "/storage/artwork/moti_thumb_1.jpg",
+                      "duration_seconds": 480
+                    },
+                    "hi": {
+                      "language": "hi",
+                      "title": "बरगद का रहस्य",
+                      "synopsis": "मोती मिलता है एक समझदार तोते से जो सुनाता है काशी की पुरानी कहानियां।",
+                      "video_url": "https://cdn.mypeblo.com/videos/moti-s1e1-hi.mp4",
+                      "thumbnail_url": "/storage/artwork/moti_thumb_1.jpg",
+                      "duration_seconds": 480
+                    }
+                  }
+                },
+                {
+                  "episode_number": 3,
+                  "content_group": "cg-moti-s1-e2",
+                  "title": "Finding the Lost Kitten",
+                  "default_title": "Finding the Lost Kitten",
+                  "default_synopsis": "Teamwork helps Moti and Sheru rescue a scared kitten from a rooftops ledge.",
+                  "duration_seconds": 510,
+                  "thumbnail_url": "/storage/artwork/moti_thumb_2.jpg",
+                  "default_language": "en",
+                  "available_languages": [
+                    "en",
+                    "hi"
+                  ],
+                  "variants": {
+                    "en": {
+                      "language": "en",
+                      "title": "Finding the Lost Kitten",
+                      "synopsis": "Teamwork helps Moti and Sheru rescue a scared kitten from a rooftops ledge.",
+                      "video_url": "https://cdn.mypeblo.com/videos/moti-s1e2-en.mp4",
+                      "thumbnail_url": "/storage/artwork/moti_thumb_2.jpg",
+                      "duration_seconds": 510
+                    },
+                    "hi": {
+                      "language": "hi",
+                      "title": "खोई हुई बिल्ली की तलाश",
+                      "synopsis": "मोती और शेरू मिलकर छत पर फंसी एक नन्हीं बिल्ली की जान बचाते हैं।",
+                      "video_url": "https://cdn.mypeblo.com/videos/moti-s1e2-hi.mp4",
+                      "thumbnail_url": "/storage/artwork/moti_thumb_2.jpg",
+                      "duration_seconds": 510
+                    }
+                  }
+                },
+                {
+                  "episode_number": 5,
+                  "content_group": "cg-moti-s1-e3",
+                  "title": "The Festival of Lights",
+                  "default_title": "The Festival of Lights",
+                  "default_synopsis": "Moti learns why sharing sweets and joy makes Diwali special for everyone.",
+                  "duration_seconds": 540,
+                  "thumbnail_url": "/storage/artwork/moti_thumb_3.jpg",
+                  "default_language": "en",
+                  "available_languages": [
+                    "en",
+                    "hi"
+                  ],
+                  "variants": {
+                    "en": {
+                      "language": "en",
+                      "title": "The Festival of Lights",
+                      "synopsis": "Moti learns why sharing sweets and joy makes Diwali special for everyone.",
+                      "video_url": "https://cdn.mypeblo.com/videos/moti-s1e3-en.mp4",
+                      "thumbnail_url": "/storage/artwork/moti_thumb_3.jpg",
+                      "duration_seconds": 540
+                    },
+                    "hi": {
+                      "language": "hi",
+                      "title": "दीपों का त्योहार",
+                      "synopsis": "मोती सीखता है कि खुशियां बांटने से रोशनी और भी चमकदार होती है।",
+                      "video_url": "https://cdn.mypeblo.com/videos/moti-s1e3-hi.mp4",
+                      "thumbnail_url": "/storage/artwork/moti_thumb_3.jpg",
+                      "duration_seconds": 540
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "trailers": [
+            {
+              "episode_number": 1,
+              "content_group": "cg-moti-trailer-1",
+              "title": "Official Trailer: The Journey Begins",
+              "synopsis": "A first glimpse into Moti's heartwarming adventures.",
+              "duration_seconds": 90,
+              "video_url": "https://youtu.be/1p7HEhdzVf4",
+              "thumbnail_url": "/storage/artwork/moti_thumb_t1.jpg",
+              "available_languages": [
+                "en",
+                "hi"
+              ]
+            }
+          ],
+          "total_episodes": 3
+        }
+      ]
+    },
+    {
+      "name": "Trending Indian Animated Stories",
+      "section_name": "Trending Indian Animated Stories",
+      "shows": [
+        {
+          "id": "show-gita-wisdom-arjuna",
+          "title": "Gita for Kids: The Wisdom of Arjuna",
+          "synopsis": "Timeless life lessons on mindfulness, courage, focus, and doing your duty with love and determination.",
+          "section": "Trending Indian Animated Stories",
+          "category": "Mythology & Culture",
+          "target_age_group": "6-12",
+          "is_featured": false,
+          "poster_url": "/storage/artwork/gita_poster.jpg",
+          "banner_url": "/storage/artwork/gita_banner.jpg",
+          "seasons": [
+            {
+              "season_number": 1,
+              "title": "The Battlefield of Mind",
+              "episodes": [
+                {
+                  "episode_number": 1,
+                  "content_group": "cg-gita-s1-e1",
+                  "title": "Focus Like an Archer",
+                  "default_title": "Focus Like an Archer",
+                  "default_synopsis": "The famous story of Drona, Arjuna, and the eye of the bird.",
+                  "duration_seconds": 520,
+                  "thumbnail_url": "/storage/artwork/gita_thumb_1.jpg",
+                  "default_language": "en",
+                  "available_languages": [
+                    "en",
+                    "hi"
+                  ],
+                  "variants": {
+                    "en": {
+                      "language": "en",
+                      "title": "Focus Like an Archer",
+                      "synopsis": "The famous story of Drona, Arjuna, and the eye of the bird.",
+                      "video_url": "https://cdn.mypeblo.com/videos/gita-s1e1-en.mp4",
+                      "thumbnail_url": "/storage/artwork/gita_thumb_1.jpg",
+                      "duration_seconds": 520
+                    },
+                    "hi": {
+                      "language": "hi",
+                      "title": "अर्जुन की एकाग्रता",
+                      "synopsis": "द्रोणाचार्य, अर्जुन और चिड़िया की आँख की प्रेरणादायक कहानी।",
+                      "video_url": "https://cdn.mypeblo.com/videos/gita-s1e1-hi.mp4",
+                      "thumbnail_url": "/storage/artwork/gita_thumb_1.jpg",
+                      "duration_seconds": 520
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "trailers": [],
+          "total_episodes": 1
+        }
+      ]
+    }
+  ],
+  "featured_shows": [
+    {
+      "id": "show-science-peblo-lab",
+      "title": "Peblo's Cosmic Science Lab",
+      "synopsis": "Join Captain Peblo as we zoom through solar systems, explore gravity, and discover how our earth works!",
+      "section": "Learn, Discover & Grow",
+      "category": "Science & Nature",
+      "target_age_group": "5-10",
+      "is_featured": true,
+      "poster_url": "/storage/artwork/science_poster.jpg",
+      "banner_url": "/storage/artwork/science_banner.jpg",
+      "seasons": [
+        {
+          "season_number": 1,
+          "title": "Space Expeditions",
+          "episodes": [
+            {
+              "episode_number": 1,
+              "content_group": "cg-sci-s1-e1",
+              "title": "Why Does the Moon Change Shape?",
+              "default_title": "Why Does the Moon Change Shape?",
+              "default_synopsis": "Learn about the lunar phases in a fun animated demonstration.",
+              "duration_seconds": 420,
+              "thumbnail_url": "/storage/artwork/science_thumb_1.jpg",
+              "default_language": "en",
+              "available_languages": [
+                "en",
+                "hi"
+              ],
+              "variants": {
+                "en": {
+                  "language": "en",
+                  "title": "Why Does the Moon Change Shape?",
+                  "synopsis": "Learn about the lunar phases in a fun animated demonstration.",
+                  "video_url": "https://cdn.mypeblo.com/videos/sci-s1e1-en.mp4",
+                  "thumbnail_url": "/storage/artwork/science_thumb_1.jpg",
+                  "duration_seconds": 420
+                },
+                "hi": {
+                  "language": "hi",
+                  "title": "चाँद का आकार क्यों बदलता है?",
+                  "synopsis": "चंद्रमा की कलाओं को सरल और रोचक अंदाज में समझें।",
+                  "video_url": "https://cdn.mypeblo.com/videos/sci-s1e1-hi.mp4",
+                  "thumbnail_url": "/storage/artwork/science_thumb_1.jpg",
+                  "duration_seconds": 420
+                }
+              }
+            },
+            {
+              "episode_number": 3,
+              "content_group": "cg-sci-s1-e2",
+              "title": "Gravity: The Invisible Superhero",
+              "default_title": "Gravity: The Invisible Superhero",
+              "default_synopsis": "Discover why apples fall down and how astronauts float in orbit.",
+              "duration_seconds": 450,
+              "thumbnail_url": "/storage/artwork/science_thumb_2.jpg",
+              "default_language": "en",
+              "available_languages": [
+                "en",
+                "hi"
+              ],
+              "variants": {
+                "en": {
+                  "language": "en",
+                  "title": "Gravity: The Invisible Superhero",
+                  "synopsis": "Discover why apples fall down and how astronauts float in orbit.",
+                  "video_url": "https://cdn.mypeblo.com/videos/sci-s1e2-en.mp4",
+                  "thumbnail_url": "/storage/artwork/science_thumb_2.jpg",
+                  "duration_seconds": 450
+                },
+                "hi": {
+                  "language": "hi",
+                  "title": "गुरुत्वाकर्षण का जादू",
+                  "synopsis": "सेब नीचे क्यों गिरता है और अंतरिक्ष में हम तैरते क्यों हैं?",
+                  "video_url": "https://cdn.mypeblo.com/videos/sci-s1e2-hi.mp4",
+                  "thumbnail_url": "/storage/artwork/science_thumb_2.jpg",
+                  "duration_seconds": 450
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "trailers": [],
+      "total_episodes": 2
+    },
+    {
+      "id": "show-moti-many-lives",
+      "title": "Moti's Many Lives",
+      "synopsis": "Join Moti the brave street pup as he discovers kindness, courage, and friendship across the vibrant alleys of Varanasi.",
+      "section": "Top Picks for You",
+      "category": "Moral Stories",
+      "target_age_group": "4-8",
+      "is_featured": true,
+      "poster_url": "/storage/artwork/moti_poster.jpg",
+      "banner_url": "/storage/artwork/moti_banner.jpg",
+      "seasons": [
+        {
+          "season_number": 1,
+          "title": "Season 1: Gali Friends",
+          "episodes": [
+            {
+              "episode_number": 1,
+              "content_group": "cg-moti-s1-e1",
+              "title": "The Whispering Banyan Tree",
+              "default_title": "The Whispering Banyan Tree",
+              "default_synopsis": "Moti meets a wise old parrot who shares ancient secrets of the town.",
+              "duration_seconds": 480,
+              "thumbnail_url": "/storage/artwork/moti_thumb_1.jpg",
+              "default_language": "en",
+              "available_languages": [
+                "en",
+                "hi"
+              ],
+              "variants": {
+                "en": {
+                  "language": "en",
+                  "title": "The Whispering Banyan Tree",
+                  "synopsis": "Moti meets a wise old parrot who shares ancient secrets of the town.",
+                  "video_url": "https://cdn.mypeblo.com/videos/moti-s1e1-en.mp4",
+                  "thumbnail_url": "/storage/artwork/moti_thumb_1.jpg",
+                  "duration_seconds": 480
+                },
+                "hi": {
+                  "language": "hi",
+                  "title": "बरगद का रहस्य",
+                  "synopsis": "मोती मिलता है एक समझदार तोते से जो सुनाता है काशी की पुरानी कहानियां।",
+                  "video_url": "https://cdn.mypeblo.com/videos/moti-s1e1-hi.mp4",
+                  "thumbnail_url": "/storage/artwork/moti_thumb_1.jpg",
+                  "duration_seconds": 480
+                }
+              }
+            },
+            {
+              "episode_number": 3,
+              "content_group": "cg-moti-s1-e2",
+              "title": "Finding the Lost Kitten",
+              "default_title": "Finding the Lost Kitten",
+              "default_synopsis": "Teamwork helps Moti and Sheru rescue a scared kitten from a rooftops ledge.",
+              "duration_seconds": 510,
+              "thumbnail_url": "/storage/artwork/moti_thumb_2.jpg",
+              "default_language": "en",
+              "available_languages": [
+                "en",
+                "hi"
+              ],
+              "variants": {
+                "en": {
+                  "language": "en",
+                  "title": "Finding the Lost Kitten",
+                  "synopsis": "Teamwork helps Moti and Sheru rescue a scared kitten from a rooftops ledge.",
+                  "video_url": "https://cdn.mypeblo.com/videos/moti-s1e2-en.mp4",
+                  "thumbnail_url": "/storage/artwork/moti_thumb_2.jpg",
+                  "duration_seconds": 510
+                },
+                "hi": {
+                  "language": "hi",
+                  "title": "खोई हुई बिल्ली की तलाश",
+                  "synopsis": "मोती और शेरू मिलकर छत पर फंसी एक नन्हीं बिल्ली की जान बचाते हैं।",
+                  "video_url": "https://cdn.mypeblo.com/videos/moti-s1e2-hi.mp4",
+                  "thumbnail_url": "/storage/artwork/moti_thumb_2.jpg",
+                  "duration_seconds": 510
+                }
+              }
+            },
+            {
+              "episode_number": 5,
+              "content_group": "cg-moti-s1-e3",
+              "title": "The Festival of Lights",
+              "default_title": "The Festival of Lights",
+              "default_synopsis": "Moti learns why sharing sweets and joy makes Diwali special for everyone.",
+              "duration_seconds": 540,
+              "thumbnail_url": "/storage/artwork/moti_thumb_3.jpg",
+              "default_language": "en",
+              "available_languages": [
+                "en",
+                "hi"
+              ],
+              "variants": {
+                "en": {
+                  "language": "en",
+                  "title": "The Festival of Lights",
+                  "synopsis": "Moti learns why sharing sweets and joy makes Diwali special for everyone.",
+                  "video_url": "https://cdn.mypeblo.com/videos/moti-s1e3-en.mp4",
+                  "thumbnail_url": "/storage/artwork/moti_thumb_3.jpg",
+                  "duration_seconds": 540
+                },
+                "hi": {
+                  "language": "hi",
+                  "title": "दीपों का त्योहार",
+                  "synopsis": "मोती सीखता है कि खुशियां बांटने से रोशनी और भी चमकदार होती है।",
+                  "video_url": "https://cdn.mypeblo.com/videos/moti-s1e3-hi.mp4",
+                  "thumbnail_url": "/storage/artwork/moti_thumb_3.jpg",
+                  "duration_seconds": 540
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "trailers": [
+        {
+          "episode_number": 1,
+          "content_group": "cg-moti-trailer-1",
+          "title": "Official Trailer: The Journey Begins",
+          "synopsis": "A first glimpse into Moti's heartwarming adventures.",
+          "duration_seconds": 90,
+          "video_url": "https://youtu.be/1p7HEhdzVf4",
+          "thumbnail_url": "/storage/artwork/moti_thumb_t1.jpg",
+          "available_languages": [
+            "en",
+            "hi"
+          ]
+        }
+      ],
+      "total_episodes": 3
+    }
+  ]
+}

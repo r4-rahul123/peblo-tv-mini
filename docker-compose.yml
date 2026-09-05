@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: peblo-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: peblo_user
+      POSTGRES_PASSWORD: peblo_password
+      POSTGRES_DB: peblo_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U peblo_user -d peblo_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: peblo-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - ENVIRONMENT=production
+      - DATABASE_URL=postgresql+asyncpg://peblo_user:peblo_password@db:5432/peblo_db
+      - STORAGE_BACKEND=local
+      - LOCAL_STORAGE_DIR=/app/storage
+      - CORS_ORIGINS=["http://localhost:3000","http://localhost:3001","http://127.0.0.1:3000","http://127.0.0.1:3001"]
+    ports:
+      - "8000:8000"
+    volumes:
+      - shared_storage:/app/storage
+
+  cms-ui:
+    build:
+      context: ./cms-ui
+      dockerfile: Dockerfile
+    container_name: peblo-cms
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3001:80"
+
+  viewer-ui:
+    build:
+      context: ./viewer-ui
+      dockerfile: Dockerfile
+    container_name: peblo-viewer
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+volumes:
+  postgres_data:
+  shared_storage:

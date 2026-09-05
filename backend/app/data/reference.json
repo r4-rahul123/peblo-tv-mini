@@ -1,0 +1,92 @@
+{
+  "sections": [
+    "Top Picks for You",
+    "Trending Indian Animated Stories",
+    "Peblo Originals & Adventures",
+    "Learn, Discover & Grow",
+    "Bedtime Stories & Calm Down",
+    "Fun Rhymes & Sing Along"
+  ],
+  "categories": [
+    "Moral Stories",
+    "Science & Nature",
+    "Mythology & Culture",
+    "Adventure & Mystery",
+    "Habits & Values",
+    "Early Learning",
+    "Animals & Wildlife"
+  ],
+  "languages": [
+    {
+      "code": "en",
+      "name": "English"
+    },
+    {
+      "code": "hi",
+      "name": "Hindi"
+    },
+    {
+      "code": "ta",
+      "name": "Tamil"
+    },
+    {
+      "code": "te",
+      "name": "Telugu"
+    },
+    {
+      "code": "bn",
+      "name": "Bengali"
+    },
+    {
+      "code": "mr",
+      "name": "Marathi"
+    },
+    {
+      "code": "gu",
+      "name": "Gujarati"
+    }
+  ],
+  "artwork_specs": {
+    "poster": {
+      "aspect_ratio": "2:3",
+      "target_width": 600,
+      "target_height": 900,
+      "min_width": 400,
+      "min_height": 600,
+      "ratio_float": 0.6667,
+      "ratio_tolerance": 0.05,
+      "max_size_bytes": 204800,
+      "max_size_kb": 200,
+      "description": "Show portrait card (2:3 aspect ratio, ~600x900px, max 200KB)"
+    },
+    "banner": {
+      "aspect_ratio": "16:9",
+      "target_width": 1280,
+      "target_height": 720,
+      "min_width": 960,
+      "min_height": 540,
+      "ratio_float": 1.7778,
+      "ratio_tolerance": 0.05,
+      "max_size_bytes": 204800,
+      "max_size_kb": 200,
+      "description": "Featured hero banner (16:9 aspect ratio, ~1280x720px, max 200KB)"
+    },
+    "thumbnail": {
+      "aspect_ratio": "16:9",
+      "target_width": 640,
+      "target_height": 360,
+      "min_width": 320,
+      "min_height": 180,
+      "ratio_float": 1.7778,
+      "ratio_tolerance": 0.05,
+      "max_size_bytes": 204800,
+      "max_size_kb": 200,
+      "description": "Episode preview card (16:9 aspect ratio, ~640x360px, max 200KB)"
+    }
+  },
+  "conventions": {
+    "season_zero_is_trailer": true,
+    "collapse_content_groups": true,
+    "max_file_size_kb": 200
+  }
+}

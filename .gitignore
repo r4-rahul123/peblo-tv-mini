@@ -1,0 +1,38 @@
+﻿# Node & Frontend dependencies
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Python & Backend
+__pycache__/
+*.py[cod]
+*.class
+*.so
+.Python
+venv/
+ENV/
+env/
+.venv/
+.pytest_cache/
+.coverage
+htmlcov/
+*.sqlite3
+*.db
+
+# Environment variables
+.env
+!.env.example
+
+# OS and Editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Scratch generator scripts
+write_*.py
+fix_*.py
+generate_assets.py
