@@ -1,12 +1,15 @@
 import time
+
 from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.database import get_db
-from app.services.storage import get_storage_provider
 from app.services.catalog_publisher import CATALOG_DESTINATION_PATH
+from app.services.storage import get_storage_provider
 
 router = APIRouter()
+
 
 @router.get("/")
 async def health_check(db: AsyncSession = Depends(get_db)):
@@ -32,13 +35,7 @@ async def health_check(db: AsyncSession = Depends(get_db)):
 
     return {
         "status": overall_status,
-        "database": {
-            "connected": db_ok,
-            "latency_ms": db_latency_ms
-        },
-        "catalogue": {
-            "published": catalog_published,
-            "path": CATALOG_DESTINATION_PATH
-        },
-        "version": "1.0.0"
+        "database": {"connected": db_ok, "latency_ms": db_latency_ms},
+        "catalogue": {"published": catalog_published, "path": CATALOG_DESTINATION_PATH},
+        "version": "1.0.0",
     }

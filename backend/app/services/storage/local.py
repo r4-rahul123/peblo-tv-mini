@@ -1,9 +1,10 @@
 import os
-import shutil
-import aiofiles
 from pathlib import Path
-from typing import Union
+
+import aiofiles
+
 from app.services.storage.base import StorageProvider
+
 
 class LocalDiskStorageProvider(StorageProvider):
     def __init__(self, base_dir: str = "./storage"):
@@ -12,7 +13,12 @@ class LocalDiskStorageProvider(StorageProvider):
         (self.base_dir / "artwork").mkdir(parents=True, exist_ok=True)
         (self.base_dir / "catalog").mkdir(parents=True, exist_ok=True)
 
-    async def save_file(self, file_content: bytes, destination_path: str, content_type: str = "image/jpeg") -> str:
+    async def save_file(
+        self,
+        file_content: bytes,
+        destination_path: str,
+        content_type: str = "image/jpeg",
+    ) -> str:
         # Normalize relative path
         clean_path = destination_path.lstrip("/").replace("storage/", "")
         target_path = self.base_dir / clean_path
@@ -31,7 +37,7 @@ class LocalDiskStorageProvider(StorageProvider):
         async with aiofiles.open(target_path, "rb") as f:
             return await f.read()
 
-    async def atomic_write(self, content: Union[str, bytes], destination_path: str) -> str:
+    async def atomic_write(self, content: str | bytes, destination_path: str) -> str:
         """
         Atomic write implementation:
         1. Write content to a temporary staging file (destination_path.tmp.<pid>)

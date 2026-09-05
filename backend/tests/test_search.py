@@ -1,6 +1,7 @@
-import pytest
 from fastapi.testclient import TestClient
+
 from app.main import app
+
 
 def test_composed_search_filtering():
     with TestClient(app) as client:

@@ -1,24 +1,25 @@
-from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_, func
 from sqlalchemy.orm import selectinload
+
+from app.api.deps import CurrentUser, require_editor
 from app.core.database import get_db
-from app.api.deps import require_editor, CurrentUser
-from app.models.models import Show, Season, Episode
-from app.schemas.schemas import ShowCreate, ShowUpdate, ShowResponse
+from app.models.models import Season, Show
+from app.schemas.schemas import ShowCreate, ShowResponse, ShowUpdate
 
 router = APIRouter()
 
-@router.get("/", response_model=List[ShowResponse])
+
+@router.get("/", response_model=list[ShowResponse])
 async def list_shows(
     db: AsyncSession = Depends(get_db),
-    section: Optional[str] = None,
-    status_filter: Optional[str] = Query(None, alias="status"),
-    category: Optional[str] = None,
-    q: Optional[str] = None,
+    section: str | None = None,
+    status_filter: str | None = Query(None, alias="status"),
+    category: str | None = None,
+    q: str | None = None,
     limit: int = 50,
-    offset: int = 0
+    offset: int = 0,
 ):
     query = select(Show).options(
         selectinload(Show.seasons).selectinload(Season.episodes)
@@ -30,14 +31,14 @@ async def list_shows(
     if category:
         query = query.where(Show.category == category)
     if q:
-        query = query.where(or_(
-            Show.title.ilike(f"%{q}%"),
-            Show.synopsis.ilike(f"%{q}%")
-        ))
+        query = query.where(
+            or_(Show.title.ilike(f"%{q}%"), Show.synopsis.ilike(f"%{q}%"))
+        )
 
     query = query.order_by(Show.updated_at.desc()).offset(offset).limit(limit)
     result = await db.execute(query)
     return result.scalars().all()
+
 
 @router.get("/{show_id}", response_model=ShowResponse)
 async def get_show(show_id: str, db: AsyncSession = Depends(get_db)):
@@ -51,11 +52,12 @@ async def get_show(show_id: str, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail=f"Show '{show_id}' not found.")
     return show
 
+
 @router.post("/", response_model=ShowResponse, status_code=status.HTTP_201_CREATED)
 async def create_show(
     show_in: ShowCreate,
     db: AsyncSession = Depends(get_db),
-    user: CurrentUser = Depends(require_editor)
+    user: CurrentUser = Depends(require_editor),
 ):
     show = Show(**show_in.model_dump())
     db.add(show)
@@ -66,7 +68,7 @@ async def create_show(
     s1 = Season(show_id=show.id, season_number=1, title="Season 1")
     db.add_all([s0, s1])
     await db.commit()
-    
+
     result = await db.execute(
         select(Show)
         .where(Show.id == show.id)
@@ -74,12 +76,13 @@ async def create_show(
     )
     return result.scalar_one()
 
+
 @router.put("/{show_id}", response_model=ShowResponse)
 async def update_show(
     show_id: str,
     show_in: ShowUpdate,
     db: AsyncSession = Depends(get_db),
-    user: CurrentUser = Depends(require_editor)
+    user: CurrentUser = Depends(require_editor),
 ):
     result = await db.execute(
         select(Show)
@@ -97,11 +100,12 @@ async def update_show(
     await db.refresh(show)
     return show
 
+
 @router.delete("/{show_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_show(
     show_id: str,
     db: AsyncSession = Depends(get_db),
-    user: CurrentUser = Depends(require_editor)
+    user: CurrentUser = Depends(require_editor),
 ):
     result = await db.execute(select(Show).where(Show.id == show_id))
     show = result.scalar_one_or_none()
@@ -109,4 +113,3 @@ async def delete_show(
         raise HTTPException(status_code=404, detail=f"Show '{show_id}' not found.")
     await db.delete(show)
     await db.commit()
-    return None

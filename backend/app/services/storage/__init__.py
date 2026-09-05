@@ -1,7 +1,8 @@
+from app.core.config import settings
 from app.services.storage.base import StorageProvider
 from app.services.storage.local import LocalDiskStorageProvider
 from app.services.storage.r2 import CloudflareR2StorageProvider
-from app.core.config import settings
+
 
 def get_storage_provider() -> StorageProvider:
     if settings.STORAGE_BACKEND == "r2" and settings.R2_ACCESS_KEY_ID:

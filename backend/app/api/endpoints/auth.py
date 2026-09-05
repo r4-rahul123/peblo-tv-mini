@@ -1,7 +1,9 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Query
+
 from app.core.security import create_access_token
 
 router = APIRouter()
+
 
 @router.post("/token")
 async def get_token(role: str = Query("admin", pattern="^(admin|editor)$")):
@@ -12,5 +14,5 @@ async def get_token(role: str = Query("admin", pattern="^(admin|editor)$")):
         "access_token": token,
         "token_type": "bearer",
         "role": role,
-        "username": username
+        "username": username,
     }

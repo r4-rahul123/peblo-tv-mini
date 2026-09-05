@@ -1,12 +1,14 @@
-import pytest
 from fastapi.testclient import TestClient
+
 from app.main import app
+
 
 def test_editor_cannot_publish():
     with TestClient(app) as client:
         res = client.post("/admin/catalog/publish", headers={"X-User-Role": "editor"})
         assert res.status_code == 403
         assert "Admin privileges required" in res.text
+
 
 def test_admin_can_trigger_publish():
     with TestClient(app) as client:

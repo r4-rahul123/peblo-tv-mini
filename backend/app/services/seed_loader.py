@@ -1,10 +1,13 @@
 import json
 from pathlib import Path
-from sqlalchemy.ext.asyncio import AsyncSession
+
 from sqlalchemy import select
-from app.models.models import Show, Season, Episode
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models.models import Episode, Season, Show
 
 SEED_FILE = Path(__file__).parent.parent / "data" / "seed_shows.json"
+
 
 async def load_seed_data(db: AsyncSession, force_reload: bool = False):
     """
@@ -32,7 +35,7 @@ async def load_seed_data(db: AsyncSession, force_reload: bool = False):
             is_featured=s_data.get("is_featured", False),
             status=s_data.get("status", "draft"),
             poster_url=s_data.get("poster_url"),
-            banner_url=s_data.get("banner_url")
+            banner_url=s_data.get("banner_url"),
         )
         db.add(show)
         await db.flush()
@@ -41,7 +44,7 @@ async def load_seed_data(db: AsyncSession, force_reload: bool = False):
             season = Season(
                 show_id=show.id,
                 season_number=season_data.get("season_number", 1),
-                title=season_data.get("title")
+                title=season_data.get("title"),
             )
             db.add(season)
             await db.flush()
@@ -57,7 +60,7 @@ async def load_seed_data(db: AsyncSession, force_reload: bool = False):
                     language=ep_data.get("language", "en"),
                     video_url=ep_data.get("video_url"),
                     thumbnail_url=ep_data.get("thumbnail_url"),
-                    status=ep_data.get("status", "draft")
+                    status=ep_data.get("status", "draft"),
                 )
                 db.add(ep)
 

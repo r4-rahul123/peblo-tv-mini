@@ -1,8 +1,9 @@
 import io
 import json
 from pathlib import Path
-from typing import Tuple, List
+
 from PIL import Image
+
 from app.schemas.schemas import ArtworkValidationResult
 
 REF_FILE = Path(__file__).parent.parent / "data" / "reference.json"
@@ -12,13 +13,40 @@ if REF_FILE.exists():
 else:
     REFERENCE_DATA = {}
 
-ARTWORK_SPECS = REFERENCE_DATA.get("artwork_specs", {
-    "poster": {"ratio_float": 2/3, "ratio_tolerance": 0.05, "max_size_bytes": 204800, "min_width": 400, "min_height": 600, "aspect_ratio": "2:3"},
-    "banner": {"ratio_float": 16/9, "ratio_tolerance": 0.05, "max_size_bytes": 204800, "min_width": 960, "min_height": 540, "aspect_ratio": "16:9"},
-    "thumbnail": {"ratio_float": 16/9, "ratio_tolerance": 0.05, "max_size_bytes": 204800, "min_width": 320, "min_height": 180, "aspect_ratio": "16:9"}
-})
+ARTWORK_SPECS = REFERENCE_DATA.get(
+    "artwork_specs",
+    {
+        "poster": {
+            "ratio_float": 2 / 3,
+            "ratio_tolerance": 0.05,
+            "max_size_bytes": 204800,
+            "min_width": 400,
+            "min_height": 600,
+            "aspect_ratio": "2:3",
+        },
+        "banner": {
+            "ratio_float": 16 / 9,
+            "ratio_tolerance": 0.05,
+            "max_size_bytes": 204800,
+            "min_width": 960,
+            "min_height": 540,
+            "aspect_ratio": "16:9",
+        },
+        "thumbnail": {
+            "ratio_float": 16 / 9,
+            "ratio_tolerance": 0.05,
+            "max_size_bytes": 204800,
+            "min_width": 320,
+            "min_height": 180,
+            "aspect_ratio": "16:9",
+        },
+    },
+)
 
-def validate_artwork_image(file_bytes: bytes, artwork_type: str) -> ArtworkValidationResult:
+
+def validate_artwork_image(
+    file_bytes: bytes, artwork_type: str
+) -> ArtworkValidationResult:
     """
     Strictly validates artwork image against the specifications in reference.json:
     - 200 KB ceiling (204,800 bytes)
@@ -26,8 +54,8 @@ def validate_artwork_image(file_bytes: bytes, artwork_type: str) -> ArtworkValid
     - Minimum dimension floors
     - Returns human-friendly, actionable error messages for non-technical editors.
     """
-    errors: List[str] = []
-    warnings: List[str] = []
+    errors: list[str] = []
+    warnings: list[str] = []
     file_size_bytes = len(file_bytes)
     file_size_kb = round(file_size_bytes / 1024, 1)
 
@@ -41,7 +69,9 @@ def validate_artwork_image(file_bytes: bytes, artwork_type: str) -> ArtworkValid
             aspect_ratio=0.0,
             file_size_bytes=file_size_bytes,
             file_size_kb=file_size_kb,
-            errors=[f"Unknown artwork slot type '{artwork_type}'. Valid types are: poster, banner, thumbnail."]
+            errors=[
+                f"Unknown artwork slot type '{artwork_type}'. Valid types are: poster, banner, thumbnail."
+            ],
         )
 
     # 1. Enforce 200 KB ceiling (204,800 bytes)
@@ -58,7 +88,7 @@ def validate_artwork_image(file_bytes: bytes, artwork_type: str) -> ArtworkValid
         width, height = image.size
         calculated_ratio = width / height if height > 0 else 0
     except Exception as e:
-        errors.append(f"Corrupt or invalid image file format. ({str(e)})")
+        errors.append(f"Corrupt or invalid image file format. ({e!s})")
         return ArtworkValidationResult(
             is_valid=False,
             artwork_type=artwork_type,
@@ -67,7 +97,7 @@ def validate_artwork_image(file_bytes: bytes, artwork_type: str) -> ArtworkValid
             aspect_ratio=0.0,
             file_size_bytes=file_size_bytes,
             file_size_kb=file_size_kb,
-            errors=errors
+            errors=errors,
         )
 
     # 3. Enforce minimum dimensions
@@ -103,5 +133,5 @@ def validate_artwork_image(file_bytes: bytes, artwork_type: str) -> ArtworkValid
         file_size_bytes=file_size_bytes,
         file_size_kb=file_size_kb,
         errors=errors,
-        warnings=warnings
+        warnings=warnings,
     )

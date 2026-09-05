@@ -1,20 +1,23 @@
-import json
 import pytest
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
 from app.core.database import Base
-from app.models.models import Show, Season, Episode
+from app.models.models import Episode, Season, Show
 from app.services.catalog_publisher import publish_catalog
-from app.services.storage.local import LocalDiskStorageProvider
+
 
 @pytest.fixture
 async def test_db():
     engine = create_async_engine("sqlite+aiosqlite:///:memory:", echo=False)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    Session = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
+    Session = async_sessionmaker(
+        bind=engine, class_=AsyncSession, expire_on_commit=False
+    )
     async with Session() as session:
         yield session
     await engine.dispose()
+
 
 @pytest.mark.asyncio
 async def test_catalog_content_group_collapsing(test_db):
@@ -25,7 +28,7 @@ async def test_catalog_content_group_collapsing(test_db):
         section="Top Picks for You",
         status="published",
         poster_url="/storage/artwork/poster.jpg",
-        banner_url="/storage/artwork/banner.jpg"
+        banner_url="/storage/artwork/banner.jpg",
     )
     test_db.add(show)
     await test_db.flush()
@@ -37,20 +40,35 @@ async def test_catalog_content_group_collapsing(test_db):
 
     # Ep 1 English & Hindi
     ep1_en = Episode(
-        season_id=s1.id, episode_number=1, title="Hello World",
-        duration_seconds=300, content_group="cg-1", language="en",
-        thumbnail_url="/storage/artwork/thumb.jpg", status="published"
+        season_id=s1.id,
+        episode_number=1,
+        title="Hello World",
+        duration_seconds=300,
+        content_group="cg-1",
+        language="en",
+        thumbnail_url="/storage/artwork/thumb.jpg",
+        status="published",
     )
     ep1_hi = Episode(
-        season_id=s1.id, episode_number=2, title="नमस्ते दुनिया",
-        duration_seconds=300, content_group="cg-1", language="hi",
-        thumbnail_url="/storage/artwork/thumb.jpg", status="published"
+        season_id=s1.id,
+        episode_number=2,
+        title="नमस्ते दुनिया",
+        duration_seconds=300,
+        content_group="cg-1",
+        language="hi",
+        thumbnail_url="/storage/artwork/thumb.jpg",
+        status="published",
     )
     # Trailer
     t1 = Episode(
-        season_id=s0.id, episode_number=1, title="Official Trailer",
-        duration_seconds=60, content_group="cg-trailer-1", language="en",
-        thumbnail_url="/storage/artwork/thumb_t.jpg", status="published"
+        season_id=s0.id,
+        episode_number=1,
+        title="Official Trailer",
+        duration_seconds=60,
+        content_group="cg-trailer-1",
+        language="en",
+        thumbnail_url="/storage/artwork/thumb_t.jpg",
+        status="published",
     )
     test_db.add_all([ep1_en, ep1_hi, t1])
     await test_db.commit()

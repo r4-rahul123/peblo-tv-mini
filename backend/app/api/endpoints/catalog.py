@@ -1,16 +1,22 @@
 import json
-from typing import Optional, List, Dict, Any
-from fastapi import APIRouter, Depends, HTTPException, Query, status, Response
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, desc
+
+from app.api.deps import CurrentUser, require_admin, require_editor
 from app.core.database import get_db
-from app.api.deps import require_admin, require_editor, CurrentUser
-from app.services.catalog_publisher import publish_catalog, rollback_to_run, CATALOG_DESTINATION_PATH
-from app.services.storage import get_storage_provider
 from app.models.models import PublishRun
 from app.schemas.schemas import PublishRunResponse
+from app.services.catalog_publisher import (
+    CATALOG_DESTINATION_PATH,
+    publish_catalog,
+    rollback_to_run,
+)
+from app.services.storage import get_storage_provider
 
 router = APIRouter()
+
 
 @router.get("", summary="Viewer Catalogue Endpoint (no slash)")
 @router.get("/", summary="Viewer Catalogue Endpoint")
@@ -30,16 +36,19 @@ async def get_catalogue(db: AsyncSession = Depends(get_db)):
             return result.get("published_catalog")
         raise HTTPException(
             status_code=404,
-            detail="Catalogue not published yet. Please publish the catalogue from the Admin CMS."
+            detail="Catalogue not published yet. Please publish the catalogue from the Admin CMS.",
         )
+
 
 @router.get("/search", summary="Composed Catalogue Search")
 async def search_catalogue(
-    q: Optional[str] = Query(None, description="Matches show title, synopsis, or episode title"),
-    category: Optional[str] = Query(None, description="Exact category filter"),
-    language: Optional[str] = Query(None, description="Available language (e.g. en, hi)"),
-    section: Optional[str] = Query(None, description="Section filter"),
-    db: AsyncSession = Depends(get_db)
+    q: str | None = Query(
+        None, description="Matches show title, synopsis, or episode title"
+    ),
+    category: str | None = Query(None, description="Exact category filter"),
+    language: str | None = Query(None, description="Available language (e.g. en, hi)"),
+    section: str | None = Query(None, description="Section filter"),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Full composed search matching show titles, episode titles, and categories.
@@ -50,7 +59,16 @@ async def search_catalogue(
         data = await storage.read_file(CATALOG_DESTINATION_PATH)
         catalog = json.loads(data.decode("utf-8"))
     except FileNotFoundError:
-        return {"results": [], "total": 0, "query": {"q": q, "category": category, "language": language, "section": section}}
+        return {
+            "results": [],
+            "total": 0,
+            "query": {
+                "q": q,
+                "category": category,
+                "language": language,
+                "section": section,
+            },
+        }
 
     matched_shows = []
     q_lower = q.lower().strip() if q else ""
@@ -115,14 +133,14 @@ async def search_catalogue(
             "q": q,
             "category": category,
             "language": language,
-            "section": section
-        }
+            "section": section,
+        },
     }
+
 
 @router.post("/publish", summary="Trigger Catalogue Publish (Admin Only)")
 async def trigger_publish(
-    db: AsyncSession = Depends(get_db),
-    user: CurrentUser = Depends(require_admin)
+    db: AsyncSession = Depends(get_db), user: CurrentUser = Depends(require_admin)
 ):
     """
     Enforced Admin-only endpoint: validates content and atomically publishes catalogue.json.
@@ -130,17 +148,17 @@ async def trigger_publish(
     """
     result = await publish_catalog(db, triggered_by=user.username)
     if not result.get("success"):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=result
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result)
     return result
 
-@router.post("/rollback/{run_id}", summary="Rollback Catalogue to Snapshot (Admin Only)")
+
+@router.post(
+    "/rollback/{run_id}", summary="Rollback Catalogue to Snapshot (Admin Only)"
+)
 async def trigger_rollback(
     run_id: str,
     db: AsyncSession = Depends(get_db),
-    user: CurrentUser = Depends(require_admin)
+    user: CurrentUser = Depends(require_admin),
 ):
     """
     Restores catalogue.json to a specific historical publish run snapshot.
@@ -150,15 +168,16 @@ async def trigger_rollback(
     if not result.get("success"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=result.get("message", "Rollback failed")
+            detail=result.get("message", "Rollback failed"),
         )
     return result
 
-@router.get("/runs", response_model=List[PublishRunResponse])
+
+@router.get("/runs", response_model=list[PublishRunResponse])
 async def list_publish_runs(
     limit: int = 20,
     db: AsyncSession = Depends(get_db),
-    user: CurrentUser = Depends(require_editor)
+    user: CurrentUser = Depends(require_editor),
 ):
     """Returns audit history of publish runs."""
     res = await db.execute(
