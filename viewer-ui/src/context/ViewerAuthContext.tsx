@@ -4,7 +4,7 @@ import { PublishedShow } from '../types';
 export interface UserProfile {
   id: string;
   name: string;
-  ageGroup: string; // '2-5' | '4-8' | '6-12' | 'All Ages'
+  ageGroup: string; // '2-4' | '5-8' | '9-12' | 'All Ages'
   isKid: boolean;
   avatarColor: string;
 }
@@ -13,6 +13,40 @@ export interface ViewerAccount {
   email: string;
   profiles: UserProfile[];
 }
+
+export const DEFAULT_FAMILY_ACCOUNT: ViewerAccount = {
+  email: 'family@peblo.tv',
+  profiles: [
+    {
+      id: 'prof-kabir',
+      name: 'Kabir',
+      ageGroup: '2-4',
+      isKid: true,
+      avatarColor: 'from-amber-500 to-orange-400',
+    },
+    {
+      id: 'prof-siya',
+      name: 'Siya',
+      ageGroup: '5-8',
+      isKid: true,
+      avatarColor: 'from-purple-500 to-pink-500',
+    },
+    {
+      id: 'prof-aarav',
+      name: 'Aarav',
+      ageGroup: '9-12',
+      isKid: true,
+      avatarColor: 'from-emerald-500 to-teal-400',
+    },
+    {
+      id: 'prof-family',
+      name: 'Family',
+      ageGroup: 'All Ages',
+      isKid: false,
+      avatarColor: 'from-blue-600 to-cyan-400',
+    },
+  ],
+};
 
 interface ViewerAuthContextType {
   account: ViewerAccount | null;
@@ -47,13 +81,7 @@ const getStoredAccounts = (): Record<string, ViewerAccount> => {
   try {
     const raw = localStorage.getItem(ACCOUNTS_STORAGE_KEY);
     const parsed = raw ? JSON.parse(raw) : {};
-    // Clean out any legacy dummy accounts
-    Object.keys(parsed).forEach((key) => {
-      if (key.includes('mypeblo.com') || key.includes('dummy')) {
-        delete parsed[key];
-      }
-    });
-    return parsed;
+    return parsed && typeof parsed === 'object' ? parsed : {};
   } catch {
     return {};
   }
@@ -62,7 +90,11 @@ const getStoredAccounts = (): Record<string, ViewerAccount> => {
 const persistAccountToStore = (acc: ViewerAccount) => {
   const all = getStoredAccounts();
   all[acc.email.toLowerCase()] = acc;
-  localStorage.setItem(ACCOUNTS_STORAGE_KEY, JSON.stringify(all));
+  try {
+    localStorage.setItem(ACCOUNTS_STORAGE_KEY, JSON.stringify(all));
+  } catch {
+    // ignore
+  }
 };
 
 const ViewerAuthContext = createContext<ViewerAuthContextType | undefined>(undefined);
@@ -74,68 +106,71 @@ export const ViewerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && typeof parsed === 'object' && Array.isArray(parsed.profiles) && parsed.profiles.length > 0) {
-          // Normalize profiles to ensure all fields exist
           const safeProfiles: UserProfile[] = parsed.profiles.map((p: any, idx: number) => ({
-            id: p.id || `prof-${Date.now()}-${idx}`,
-            name: p.name || 'User',
-            ageGroup: p.ageGroup || 'All Ages',
+            id: String(p.id || `prof-${Date.now()}-${idx}`),
+            name: String(p.name || 'User'),
+            ageGroup: String(p.ageGroup || 'All Ages'),
             isKid: p.isKid ?? (p.ageGroup !== 'All Ages'),
-            avatarColor: p.avatarColor || AVATAR_COLORS[idx % AVATAR_COLORS.length],
+            avatarColor: String(p.avatarColor || AVATAR_COLORS[idx % AVATAR_COLORS.length]),
           }));
           return {
-            email: parsed.email || 'viewer@peblo.tv',
+            email: String(parsed.email || 'family@peblo.tv'),
             profiles: safeProfiles,
           };
         }
       }
     } catch {
-      localStorage.removeItem(SESSION_STORAGE_KEY);
-      localStorage.removeItem(ACTIVE_PROF_KEY);
+      // ignore
     }
-    return null;
+    return DEFAULT_FAMILY_ACCOUNT;
   });
 
   const [activeProfileId, setActiveProfileId] = useState<string>(() => {
-    return localStorage.getItem(ACTIVE_PROF_KEY) || '';
+    try {
+      return localStorage.getItem(ACTIVE_PROF_KEY) || 'prof-kabir';
+    } catch {
+      return 'prof-kabir';
+    }
   });
 
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [pendingShow, setPendingShow] = useState<PublishedShow | null>(null);
 
-  const profilesList = Array.isArray(account?.profiles) ? account.profiles : [];
+  const effectiveAccount = account || DEFAULT_FAMILY_ACCOUNT;
+  const profilesList = Array.isArray(effectiveAccount.profiles) && effectiveAccount.profiles.length > 0
+    ? effectiveAccount.profiles
+    : DEFAULT_FAMILY_ACCOUNT.profiles;
+
   const activeProfile =
-    profilesList.find((p) => p.id === activeProfileId) || profilesList[0] || null;
+    profilesList.find((p) => p.id === activeProfileId) || profilesList[0] || DEFAULT_FAMILY_ACCOUNT.profiles[0];
 
   const saveAccountState = (updatedAccount: ViewerAccount | null, newActiveId?: string) => {
-    setAccount(updatedAccount);
-    if (updatedAccount && Array.isArray(updatedAccount.profiles) && updatedAccount.profiles.length > 0) {
-      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(updatedAccount));
-      persistAccountToStore(updatedAccount);
-      const targetId = newActiveId || updatedAccount.profiles[0].id;
+    const finalAccount = updatedAccount || DEFAULT_FAMILY_ACCOUNT;
+    setAccount(finalAccount);
+    try {
+      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(finalAccount));
+      persistAccountToStore(finalAccount);
+      const targetId = newActiveId || finalAccount.profiles[0]?.id || 'prof-kabir';
       setActiveProfileId(targetId);
       localStorage.setItem(ACTIVE_PROF_KEY, targetId);
-    } else {
-      localStorage.removeItem(SESSION_STORAGE_KEY);
-      localStorage.removeItem(ACTIVE_PROF_KEY);
-      setActiveProfileId('');
+    } catch {
+      // ignore
     }
   };
 
   const login = (email: string, initialName?: string, ageGroup?: string, isSignUp?: boolean) => {
-    const cleanEmail = email.trim().toLowerCase() || 'family@mypeblo.com';
+    const cleanEmail = email.trim().toLowerCase() || 'family@peblo.tv';
     const allAccounts = getStoredAccounts();
     const existing = allAccounts[cleanEmail];
 
-    // If it's pure Sign In (not Sign Up) AND existing account found -> restore existing!
-    if (!isSignUp && existing && existing.profiles && existing.profiles.length > 0) {
+    if (!isSignUp && existing && Array.isArray(existing.profiles) && existing.profiles.length > 0) {
       saveAccountState(existing, existing.profiles[0].id);
       return;
     }
 
-    // Otherwise (Sign Up or new user), create fresh account with the exact Name entered!
     const profileName = initialName?.trim() || cleanEmail.split('@')[0] || 'User';
-    const selectedAge = ageGroup || '4-8';
+    const selectedAge = ageGroup || '5-8';
     const isKid = selectedAge !== 'All Ages';
 
     const newProfile: UserProfile = {
@@ -155,13 +190,12 @@ export const ViewerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const logout = () => {
-    saveAccountState(null);
+    saveAccountState(DEFAULT_FAMILY_ACCOUNT, 'prof-kabir');
   };
 
   const addProfile = (name: string, ageGroup: string): boolean => {
-    if (!account) return false;
-    const currentProfiles = Array.isArray(account.profiles) ? account.profiles : [];
-    if (currentProfiles.length >= 4) return false; // Max 4 profiles
+    const currentProfiles = Array.isArray(effectiveAccount.profiles) ? effectiveAccount.profiles : [];
+    if (currentProfiles.length >= 4) return false;
 
     const cleanName = name.trim();
     if (!cleanName) return false;
@@ -178,7 +212,7 @@ export const ViewerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     };
 
     const updatedAccount: ViewerAccount = {
-      ...account,
+      ...effectiveAccount,
       profiles: [...currentProfiles, newProfile],
     };
 
@@ -187,23 +221,23 @@ export const ViewerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const switchProfile = (profileId: string) => {
-    if (!account) return;
-    const currentProfiles = Array.isArray(account.profiles) ? account.profiles : [];
-    const exists = currentProfiles.some((p) => p.id === profileId);
+    const exists = profilesList.some((p) => p.id === profileId);
     if (exists) {
       setActiveProfileId(profileId);
-      localStorage.setItem('peblo_active_profile_id', profileId);
+      try {
+        localStorage.setItem(ACTIVE_PROF_KEY, profileId);
+      } catch {
+        // ignore
+      }
     }
   };
 
   const deleteProfile = (profileId: string) => {
-    if (!account) return;
-    const currentProfiles = Array.isArray(account.profiles) ? account.profiles : [];
-    if (currentProfiles.length <= 1) return; // Keep at least 1 profile
+    if (profilesList.length <= 1) return;
 
-    const updatedProfiles = currentProfiles.filter((p) => p.id !== profileId);
+    const updatedProfiles = profilesList.filter((p) => p.id !== profileId);
     const updatedAccount: ViewerAccount = {
-      ...account,
+      ...effectiveAccount,
       profiles: updatedProfiles,
     };
 
@@ -232,7 +266,7 @@ export const ViewerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   return (
     <ViewerAuthContext.Provider
       value={{
-        account,
+        account: effectiveAccount,
         activeProfile,
         user: activeProfile,
         login,
