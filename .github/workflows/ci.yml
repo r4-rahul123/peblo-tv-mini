@@ -8,64 +8,72 @@ on:
 
 jobs:
   backend-tests:
-    name: Backend Lint & Pytest
+    name: Backend Tests & Lint
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
+          cache-dependency-path: 'backend/requirements.txt'
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
-          cd backend
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install ruff
 
       - name: Lint with Ruff
         run: |
-          cd backend
           ruff check . --select E,F,W --ignore E501
 
       - name: Run Pytest Test Suite
         run: |
-          cd backend
           python -m pytest tests/ -v --color=yes
 
   cms-ui-build:
-    name: CMS UI Build & Typecheck
+    name: CMS UI Build
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./cms-ui
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
       - name: Set up Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Install and Build CMS UI
+      - name: Install & Build CMS UI
         run: |
-          cd cms-ui
-          npm ci || npm install
+          npm install
           npm run build
 
   viewer-ui-build:
-    name: Viewer UI Build & Typecheck
+    name: Viewer UI Build
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./viewer-ui
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
       - name: Set up Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Install and Build Viewer UI
+      - name: Install & Build Viewer UI
         run: |
-          cd viewer-ui
-          npm ci || npm install
+          npm install
           npm run build
