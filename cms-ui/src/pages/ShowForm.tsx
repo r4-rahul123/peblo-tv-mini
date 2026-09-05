@@ -173,6 +173,23 @@ export const ShowForm: React.FC<ShowFormProps> = ({ show, onBack, onSaved }) => 
           </div>
 
           <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-300">Target Age Group *</label>
+            <select
+              value={targetAgeGroup}
+              onChange={(e) => setTargetAgeGroup(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500"
+            >
+              <option value="2-5">Ages 2-5 (Toddlers & Rhymes)</option>
+              <option value="2-6">Ages 2-6 (Toddlers & Bedtime)</option>
+              <option value="4-8">Ages 4-8 (Early Learning & Stories)</option>
+              <option value="5-10">Ages 5-10 (Science & Discovery)</option>
+              <option value="5-11">Ages 5-11 (Wildlife & Adventures)</option>
+              <option value="6-12">Ages 6-12 (Mythology & Advanced Learning)</option>
+              <option value="All Ages">All Ages (Family)</option>
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-300">Publication Status</label>
             <select
               value={status}

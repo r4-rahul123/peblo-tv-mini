@@ -134,7 +134,7 @@ export const ShowList: React.FC<ShowListProps> = ({ onSelectShow, onCreateShow }
                       <p className='text-xs text-slate-400 line-clamp-2 leading-relaxed'>{show.synopsis || 'No synopsis provided.'}</p>
                       <div className='pt-2 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800/60'>
                         <span className='flex items-center space-x-1'><Layers className='w-3.5 h-3.5 text-amber-500' /><span>{show.seasons?.length || 0} Seasons</span></span>
-                        <span>{totalEpisodes} Episodes</span>
+                        <span className='bg-amber-500/10 text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded text-[10px] font-bold'>Ages {show.target_age_group || '4-8'}</span>
                         <span className='bg-slate-800 px-1.5 py-0.5 rounded text-[10px] text-slate-300'>{show.category || 'General'}</span>
                       </div>
                     </div>
