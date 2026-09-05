@@ -69,19 +69,28 @@ const ViewerAuthContext = createContext<ViewerAuthContextType | undefined>(undef
 
 export const ViewerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [account, setAccount] = useState<ViewerAccount | null>(() => {
-    const saved = localStorage.getItem(SESSION_STORAGE_KEY);
-    if (saved) {
-      try {
+    try {
+      const saved = localStorage.getItem(SESSION_STORAGE_KEY);
+      if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed?.email?.includes('mypeblo.com')) {
-          localStorage.removeItem(SESSION_STORAGE_KEY);
-          localStorage.removeItem(ACTIVE_PROF_KEY);
-          return null;
+        if (parsed && typeof parsed === 'object' && Array.isArray(parsed.profiles) && parsed.profiles.length > 0) {
+          // Normalize profiles to ensure all fields exist
+          const safeProfiles: UserProfile[] = parsed.profiles.map((p: any, idx: number) => ({
+            id: p.id || `prof-${Date.now()}-${idx}`,
+            name: p.name || 'User',
+            ageGroup: p.ageGroup || 'All Ages',
+            isKid: p.isKid ?? (p.ageGroup !== 'All Ages'),
+            avatarColor: p.avatarColor || AVATAR_COLORS[idx % AVATAR_COLORS.length],
+          }));
+          return {
+            email: parsed.email || 'viewer@peblo.tv',
+            profiles: safeProfiles,
+          };
         }
-        return parsed;
-      } catch (e) {
-        return null;
       }
+    } catch {
+      localStorage.removeItem(SESSION_STORAGE_KEY);
+      localStorage.removeItem(ACTIVE_PROF_KEY);
     }
     return null;
   });
@@ -94,14 +103,16 @@ export const ViewerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [pendingShow, setPendingShow] = useState<PublishedShow | null>(null);
 
-  const activeProfile = account?.profiles.find((p) => p.id === activeProfileId) || account?.profiles[0] || null;
+  const profilesList = Array.isArray(account?.profiles) ? account.profiles : [];
+  const activeProfile =
+    profilesList.find((p) => p.id === activeProfileId) || profilesList[0] || null;
 
   const saveAccountState = (updatedAccount: ViewerAccount | null, newActiveId?: string) => {
     setAccount(updatedAccount);
-    if (updatedAccount) {
+    if (updatedAccount && Array.isArray(updatedAccount.profiles) && updatedAccount.profiles.length > 0) {
       localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(updatedAccount));
       persistAccountToStore(updatedAccount);
-      const targetId = newActiveId || (updatedAccount.profiles[0]?.id || '');
+      const targetId = newActiveId || updatedAccount.profiles[0].id;
       setActiveProfileId(targetId);
       localStorage.setItem(ACTIVE_PROF_KEY, targetId);
     } else {
@@ -149,12 +160,13 @@ export const ViewerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const addProfile = (name: string, ageGroup: string): boolean => {
     if (!account) return false;
-    if (account.profiles.length >= 4) return false; // Max 4 profiles
+    const currentProfiles = Array.isArray(account.profiles) ? account.profiles : [];
+    if (currentProfiles.length >= 4) return false; // Max 4 profiles
 
     const cleanName = name.trim();
     if (!cleanName) return false;
 
-    const colorIdx = account.profiles.length % AVATAR_COLORS.length;
+    const colorIdx = currentProfiles.length % AVATAR_COLORS.length;
     const isKid = ageGroup !== 'All Ages';
 
     const newProfile: UserProfile = {
@@ -167,7 +179,7 @@ export const ViewerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     const updatedAccount: ViewerAccount = {
       ...account,
-      profiles: [...account.profiles, newProfile],
+      profiles: [...currentProfiles, newProfile],
     };
 
     saveAccountState(updatedAccount, newProfile.id);
@@ -176,7 +188,8 @@ export const ViewerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const switchProfile = (profileId: string) => {
     if (!account) return;
-    const exists = account.profiles.some((p) => p.id === profileId);
+    const currentProfiles = Array.isArray(account.profiles) ? account.profiles : [];
+    const exists = currentProfiles.some((p) => p.id === profileId);
     if (exists) {
       setActiveProfileId(profileId);
       localStorage.setItem('peblo_active_profile_id', profileId);
@@ -184,9 +197,11 @@ export const ViewerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const deleteProfile = (profileId: string) => {
-    if (!account || account.profiles.length <= 1) return; // Keep at least 1 profile
+    if (!account) return;
+    const currentProfiles = Array.isArray(account.profiles) ? account.profiles : [];
+    if (currentProfiles.length <= 1) return; // Keep at least 1 profile
 
-    const updatedProfiles = account.profiles.filter((p) => p.id !== profileId);
+    const updatedProfiles = currentProfiles.filter((p) => p.id !== profileId);
     const updatedAccount: ViewerAccount = {
       ...account,
       profiles: updatedProfiles,
