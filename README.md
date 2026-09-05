@@ -100,7 +100,7 @@ docker compose up --build -d
 | **Viewer UI** | [http://localhost:3000](http://localhost:3000) | Netflix-style kid-friendly OTT streaming UI |
 | **CMS Studio** | [http://localhost:3001](http://localhost:3001) | Content management & publish dashboard |
 | **FastAPI Backend** | [http://localhost:8000](http://localhost:8000) | REST API & Interactive Swagger Docs (`/docs`) |
-| **PostgreSQL DB** | `localhost:5433` | Database container (`peblo_db`) |
+| **PostgreSQL DB** | `localhost:5432` | Database container (`peblo_db`) |
 
 ---
 
