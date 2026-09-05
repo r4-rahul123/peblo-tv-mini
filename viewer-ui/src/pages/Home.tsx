@@ -71,8 +71,8 @@ export const Home: React.FC = () => {
       const res = await api.get('/catalog');
       return res.data;
     },
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
+    staleTime: 5 * 1000,
+    refetchOnWindowFocus: true,
     retry: 2,
   });
 

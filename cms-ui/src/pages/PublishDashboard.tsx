@@ -251,19 +251,27 @@ export const PublishDashboard: React.FC = () => {
                     <div className="text-slate-500">{run.sections_count} sections</div>
                   </div>
 
-                  {isAdmin && run.status === 'SUCCESS' && idx !== 0 && (
+                  {run.status === 'SUCCESS' && idx !== 0 && (
                     <button
                       onClick={() => {
+                        if (!isAdmin) {
+                          setPublishError('Action blocked: Please switch role to Admin (top right) to perform catalogue rollback.');
+                          return;
+                        }
                         if (window.confirm(`Are you sure you want to rollback catalogue to run ${run.run_id}?`)) {
                           rollbackMutation.mutate(run.run_id);
                         }
                       }}
                       disabled={rollbackMutation.isPending}
-                      className="bg-slate-800 hover:bg-amber-600 hover:text-slate-950 text-slate-200 border border-slate-700 px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all shadow-sm disabled:opacity-50"
-                      title="Rollback catalogue to this exact snapshot"
+                      className={`${
+                        isAdmin
+                          ? 'bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-200 border-slate-700'
+                          : 'bg-slate-900 text-slate-500 border-slate-800 cursor-not-allowed'
+                      } border px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all shadow-sm disabled:opacity-50`}
+                      title={isAdmin ? "Rollback catalogue to this exact historical snapshot" : "Switch to Admin role to rollback"}
                     >
-                      <RotateCcw className="w-3 h-3" />
-                      <span>Rollback</span>
+                      <RotateCcw className={`w-3 h-3 ${rollbackMutation.isPending ? 'animate-spin' : ''}`} />
+                      <span>{rollbackMutation.isPending ? 'Restoring...' : 'Rollback'}</span>
                     </button>
                   )}
                 </div>

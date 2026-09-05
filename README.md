@@ -141,10 +141,10 @@ cp .env.example .env
 | :--- | :--- | :--- |
 | `PROJECT_NAME` | `Peblo TV Mini API` | Human-readable title for FastAPI metadata and OpenAPI documentation. |
 | `API_V1_STR` | `/api/v1` | URL routing prefix for all version 1 REST API endpoints. |
-| `SECRET_KEY` | `peblo-mini-secret-key-development-mode-only-super-safe` | Cryptographic secret key used for session signing and auth token integrity. |
+| `SECRET_KEY` | `your-secret-key-change-in-production` | Cryptographic secret key used for session signing and auth token integrity. |
 | `ALGORITHM` | `HS256` | JWT encoding algorithm. |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | `1440` | Expiration window in minutes for access tokens (defaults to 24h). |
-| `DATABASE_URL` | `postgresql+asyncpg://postgres:hello123@localhost:5433/peblo_db` | Async SQLAlchemy database connection string (PostgreSQL for docker/prod; supports SQLite for local testing). |
+| `DATABASE_URL` | `sqlite+aiosqlite:///./peblo.db` | Async SQLAlchemy database connection string (SQLite for local dev; `postgresql+asyncpg://<user>:<password>@<host>:5432/<dbname>` for production/Docker). |
 | `STORAGE_BACKEND` | `local` | Storage provider strategy to use: `local` (filesystem storage) or `r2` (Cloudflare R2 / S3-compatible object storage). |
 | `LOCAL_STORAGE_DIR` | `./storage` | Filesystem directory used for storing published catalogues and uploaded artwork when `STORAGE_BACKEND=local`. |
 | `R2_ACCOUNT_ID` | `your-cloudflare-account-id` | Cloudflare R2 Account ID (used to construct S3 endpoint URL). |
@@ -152,7 +152,7 @@ cp .env.example .env
 | `R2_SECRET_ACCESS_KEY` | `your-r2-secret-access-key` | Cloudflare R2 / AWS S3 secret access key credential. |
 | `R2_BUCKET_NAME` | `peblo-tv-mini-catalogue` | Name of the bucket storing catalogue JSON payloads and uploaded artwork assets. |
 | `R2_PUBLIC_URL` | `https://cdn.peblo.tv` | Public CDN domain or URL base for serving published catalogue JSON and media files directly. |
-| `BACKEND_CORS_ORIGINS` | `["http://localhost:3000","http://localhost:3001",...]` | JSON list of allowed origins permitted to make cross-origin requests to the FastAPI backend. |
+| `BACKEND_CORS_ORIGINS` | `["http://localhost:3000","http://localhost:3001"]` | JSON list of allowed origins permitted to make cross-origin requests to the FastAPI backend. |
 
 ---
 

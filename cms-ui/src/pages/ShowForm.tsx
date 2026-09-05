@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Show } from '../types';
 import { ArtworkUploadSlot } from '../components/ArtworkUploadSlot';
 import api, { getMediaUrl } from '../api/client';
-import { ArrowLeft, Save, Plus, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Save, Plus, AlertCircle, Trash2 } from 'lucide-react';
 
 interface ShowFormProps {
   show?: Show | null;
@@ -82,6 +82,17 @@ export const ShowForm: React.FC<ShowFormProps> = ({ show, onBack, onSaved }) => 
       onSaved();
     } catch (err: any) {
       setEpError(err.response?.data?.detail || 'Failed to add episode. Check for duplicate content_group and language.');
+    }
+  };
+
+  const handleDeleteEpisode = async (episodeId: string) => {
+    if (window.confirm('Delete this episode track from the show?')) {
+      try {
+        await api.delete('/episodes/' + episodeId);
+        onSaved();
+      } catch (err: any) {
+        alert(err.response?.data?.detail || 'Failed to delete episode track.');
+      }
     }
   };
 
@@ -309,9 +320,19 @@ export const ShowForm: React.FC<ShowFormProps> = ({ show, onBack, onSaved }) => 
                           </div>
                         </div>
 
-                        <span className={'text-[10px] px-2 py-0.5 rounded font-semibold border ' + (ep.status === 'published' ? 'bg-emerald-950 text-emerald-300 border-emerald-800' : 'bg-slate-900 text-slate-400 border-slate-800')}>
-                          {ep.status}
-                        </span>
+                        <div className="flex items-center space-x-2">
+                          <span className={'text-[10px] px-2 py-0.5 rounded font-semibold border ' + (ep.status === 'published' ? 'bg-emerald-950 text-emerald-300 border-emerald-800' : 'bg-slate-900 text-slate-400 border-slate-800')}>
+                            {ep.status}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteEpisode(ep.id)}
+                            className="p-1 text-slate-500 hover:text-red-400 hover:bg-red-950/40 rounded transition-colors"
+                            title="Delete this episode track"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>

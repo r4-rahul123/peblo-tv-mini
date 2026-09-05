@@ -1,6 +1,6 @@
 {
-  "catalog_version": "run-20260905120401-f1b626",
-  "published_at": "2026-09-05T12:04:01.294383+00:00",
+  "catalog_version": "run-20260905113902-e99341",
+  "published_at": "2026-09-05T11:39:02.674647+00:00",
   "published_by": "admin@mypeblo.com",
   "total_shows": 6,
   "total_episodes": 9,
@@ -35,6 +35,7 @@
                   "default_language": "en",
                   "available_languages": [
                     "en",
+                    "ta",
                     "hi"
                   ],
                   "variants": {
@@ -44,6 +45,14 @@
                       "synopsis": "A soothing tale of how the forest settles down as the moon rises.",
                       "video_url": "https://cdn.mypeblo.com/videos/bed-s1e1-en.mp4",
                       "thumbnail_url": "/storage/artwork/bedtime_thumb_1.jpg",
+                      "duration_seconds": 720
+                    },
+                    "ta": {
+                      "language": "ta",
+                      "title": "Sleeping Forest Owl Tamil",
+                      "synopsis": null,
+                      "video_url": null,
+                      "thumbnail_url": "/storage/artwork/thumbnail_8e91627d.jpg",
                       "duration_seconds": 720
                     },
                     "hi": {
