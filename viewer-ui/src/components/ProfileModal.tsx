@@ -96,7 +96,7 @@ export const ProfileModal: React.FC = () => {
                       }`}
                     >
                       <span className="text-2xl sm:text-3xl font-black text-slate-950">
-                        {p.name.charAt(0).toUpperCase()}
+                        {(p.name || 'P').charAt(0).toUpperCase()}
                       </span>
                       {isActive && (
                         <div className="absolute -bottom-2 -right-2 w-6 h-6 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center shadow-md">

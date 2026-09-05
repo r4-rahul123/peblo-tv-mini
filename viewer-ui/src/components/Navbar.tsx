@@ -58,9 +58,9 @@ export const Navbar: React.FC<NavbarProps> = () => {
                       activeProfile?.avatarColor || 'from-amber-500 to-yellow-400'
                     } flex items-center justify-center text-slate-950 font-black text-xs shadow-sm`}
                   >
-                    <span className="text-[10px] font-black">{activeProfile?.name.charAt(0).toUpperCase()}</span>
+                    <span className="text-[10px] font-black">{(activeProfile?.name || 'P').charAt(0).toUpperCase()}</span>
                   </div>
-                  <span className="text-xs font-semibold text-slate-200">{activeProfile?.name}</span>
+                  <span className="text-xs font-semibold text-slate-200">{activeProfile?.name || 'Profile'}</span>
                   <ChevronDown className="w-3 h-3 text-slate-400" />
                 </button>
 
@@ -86,11 +86,11 @@ export const Navbar: React.FC<NavbarProps> = () => {
                           >
                             <div className="flex items-center space-x-2">
                               <div
-                                className={`w-5 h-5 rounded-md bg-gradient-to-tr ${p.avatarColor} flex items-center justify-center text-slate-950 text-[9px] font-black`}
+                                className={`w-5 h-5 rounded-md bg-gradient-to-tr ${p.avatarColor || 'from-amber-500 to-yellow-400'} flex items-center justify-center text-slate-950 text-[9px] font-black`}
                               >
-                                {p.name.charAt(0).toUpperCase()}
+                                {(p.name || 'P').charAt(0).toUpperCase()}
                               </div>
-                              <span className="truncate max-w-[110px]">{p.name}</span>
+                              <span className="truncate max-w-[110px]">{p.name || 'Profile'}</span>
                             </div>
                             <span className="text-[10px] text-slate-400">{p.ageGroup === 'All Ages' ? 'All' : `${p.ageGroup}`}</span>
                           </button>

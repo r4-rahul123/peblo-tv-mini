@@ -13,20 +13,20 @@ const isShowSuitableForAge = (showAgeGroup: string | undefined, userAgeGroup: st
   if (!userAgeGroup || userAgeGroup === 'All Ages') return true;
   if (!showAgeGroup) return true;
 
-  const userAge = userAgeGroup.toLowerCase();
+  const userAge = (userAgeGroup || '').toLowerCase();
 
   // 1. Ages 2-4 (Toddlers: Rhymes & Bedtime Lullabies)
-  if (userAge.includes('2-4') || userAge.includes('2-5')) {
+  if (userAge.includes('2') || userAge.includes('3') || userAge.includes('4')) {
     return showAgeGroup === '2-5' || showAgeGroup === '2-6' || category === 'Early Learning';
   }
 
   // 2. Ages 5-8 (Moral Stories & Jungle Fables)
-  if (userAge.includes('5-8') || userAge.includes('4-8')) {
+  if (userAge.includes('5') || userAge.includes('6') || userAge.includes('7') || userAge.includes('8')) {
     return showAgeGroup === '4-8' || showAgeGroup === '5-11' || category === 'Moral Stories' || category === 'Animals & Wildlife';
   }
 
   // 3. Ages 9-12 (Science, Adventures & Mythology)
-  if (userAge.includes('9-12') || userAge.includes('6-12')) {
+  if (userAge.includes('9') || userAge.includes('10') || userAge.includes('11') || userAge.includes('12')) {
     return showAgeGroup === '5-10' || showAgeGroup === '6-12' || category === 'Science & Nature' || category === 'Mythology & Culture';
   }
 
@@ -265,12 +265,12 @@ export const Home: React.FC = () => {
       ) : (
         /* Standard Categorized Horizontal Section Rails */
         <section className="space-y-8">
-          {activeProfile && activeProfile.ageGroup !== 'All Ages' && (
+          {activeProfile && activeProfile.ageGroup && activeProfile.ageGroup !== 'All Ages' && (
             <div className="flex items-center justify-between bg-slate-900/80 border border-amber-500/20 rounded-2xl px-4 py-2.5 text-xs text-slate-300">
               <div className="flex items-center space-x-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span>
-                  Browsing personalized for <strong className="text-amber-400 font-bold">{activeProfile.name}</strong> ({activeProfile.ageGroup.includes('2') ? 'Ages 2-4 • Toddlers & Rhymes' : activeProfile.ageGroup.includes('5') || activeProfile.ageGroup.includes('4') ? 'Ages 5-8 • Stories & Learning' : 'Ages 9-12 • Adventures & Science'})
+                  Browsing personalized for <strong className="text-amber-400 font-bold">{activeProfile?.name || 'Child'}</strong> ({String(activeProfile?.ageGroup || '').includes('2') ? 'Ages 2-4 • Toddlers & Rhymes' : String(activeProfile?.ageGroup || '').includes('5') || String(activeProfile?.ageGroup || '').includes('4') ? 'Ages 5-8 • Stories & Learning' : 'Ages 9-12 • Adventures & Science'})
                 </span>
               </div>
               <span className="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded-full font-bold">
