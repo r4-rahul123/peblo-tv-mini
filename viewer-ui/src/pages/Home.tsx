@@ -9,28 +9,30 @@ import { SearchFilterBar } from '../components/SearchFilterBar';
 import { ShowDetailModal } from '../components/ShowDetailModal';
 import { Film, AlertCircle, RefreshCw } from 'lucide-react';
 
-const isShowSuitableForAge = (showAgeGroup: string | undefined, userAgeGroup: string | undefined, category?: string): boolean => {
+const parseAgeRange = (ageStr: string): [number, number] => {
+  if (!ageStr) return [0, 99];
+  const parts = ageStr.split('-').map((s) => parseInt(s.trim(), 10));
+  if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+    return [parts[0], parts[1]];
+  }
+  if (parts.length === 1 && !isNaN(parts[0])) {
+    return [parts[0], parts[0]];
+  }
+  return [0, 99]; // "All Ages" or unrecognized → match everything
+};
+
+const rangesOverlap = (a: [number, number], b: [number, number]): boolean => {
+  return a[0] <= b[1] && b[0] <= a[1];
+};
+
+const isShowSuitableForAge = (showAgeGroup: string | undefined, userAgeGroup: string | undefined): boolean => {
   if (!userAgeGroup || userAgeGroup === 'All Ages') return true;
   if (!showAgeGroup) return true;
 
-  const userAge = (userAgeGroup || '').toLowerCase();
+  const userRange = parseAgeRange(userAgeGroup);
+  const showRange = parseAgeRange(showAgeGroup);
 
-  // 1. Ages 2-4 (Toddlers: Rhymes & Bedtime Lullabies)
-  if (userAge.includes('2') || userAge.includes('3') || userAge.includes('4')) {
-    return showAgeGroup === '2-5' || showAgeGroup === '2-6' || category === 'Early Learning';
-  }
-
-  // 2. Ages 5-8 (Moral Stories & Jungle Fables)
-  if (userAge.includes('5') || userAge.includes('6') || userAge.includes('7') || userAge.includes('8')) {
-    return showAgeGroup === '4-8' || showAgeGroup === '5-11' || category === 'Moral Stories' || category === 'Animals & Wildlife';
-  }
-
-  // 3. Ages 9-12 (Science, Adventures & Mythology)
-  if (userAge.includes('9') || userAge.includes('10') || userAge.includes('11') || userAge.includes('12')) {
-    return showAgeGroup === '5-10' || showAgeGroup === '6-12' || category === 'Science & Nature' || category === 'Mythology & Culture';
-  }
-
-  return true;
+  return rangesOverlap(userRange, showRange);
 };
 
 export const Home: React.FC = () => {
@@ -89,7 +91,7 @@ export const Home: React.FC = () => {
         : catalog.sections?.[0]?.shows || [];
 
     const ageMatched = candidates.find((show: any) =>
-      isShowSuitableForAge(show.target_age_group, activeProfile?.ageGroup, show.category)
+      isShowSuitableForAge(show.target_age_group, activeProfile?.ageGroup)
     );
     return ageMatched || candidates[0] || null;
   }, [catalog, activeProfile]);
@@ -146,7 +148,7 @@ export const Home: React.FC = () => {
       .map((section: any) => ({
         ...section,
         shows: (section.shows || []).filter((show: PublishedShow) =>
-          isShowSuitableForAge(show.target_age_group, activeProfile.ageGroup, show.category)
+          isShowSuitableForAge(show.target_age_group, activeProfile.ageGroup)
         ),
       }))
       .filter((section: any) => section.shows && section.shows.length > 0);
