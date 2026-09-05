@@ -106,9 +106,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
                 onChange={(e) => setKidAge(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500"
               >
-                <option value="2-5">Ages 2-5 (Toddlers & Nursery Rhymes)</option>
-                <option value="4-8">Ages 4-8 (Moral Stories & Fables)</option>
-                <option value="6-12">Ages 6-12 (Mythology & Science)</option>
+                <option value="2-4">Ages 2-4 (Toddlers & Nursery Rhymes)</option>
+                <option value="5-8">Ages 5-8 (Early Learning & Moral Stories)</option>
+                <option value="9-12">Ages 9-12 (Adventures, Science & Mythology)</option>
                 <option value="All Ages">All Ages (Family & Full Access)</option>
               </select>
             </div>

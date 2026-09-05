@@ -16,19 +16,19 @@ const isShowSuitableForAge = (showAgeGroup: string | undefined, userAgeGroup: st
   const userAge = userAgeGroup.toLowerCase();
   const showAge = showAgeGroup.toLowerCase();
 
-  // Toddlers (2-5)
-  if (userAge.includes('2-5')) {
-    return showAge.includes('2') || showAge.includes('3') || showAge.includes('4') || showAge.includes('2-5');
+  // Toddlers (Ages 2-4 or 2-5)
+  if (userAge.includes('2-4') || userAge.includes('2-5')) {
+    return showAge.includes('2') || showAge.includes('3') || showAge.includes('4') || showAge.includes('rhyme') || showAge === '2-5';
   }
 
-  // Early Learning (4-8)
-  if (userAge.includes('4-8')) {
-    return showAge.includes('2-5') || showAge.includes('4-8') || showAge.includes('4') || showAge.includes('5') || showAge.includes('6');
+  // Early Learning & Stories (Ages 5-8 or 4-8)
+  if (userAge.includes('5-8') || userAge.includes('4-8')) {
+    return showAge.includes('4') || showAge.includes('5') || showAge.includes('6') || showAge.includes('7') || showAge.includes('8') || showAge === '4-8';
   }
 
-  // Older Kids (6-12)
-  if (userAge.includes('6-12')) {
-    return !showAge.includes('2-5'); // 6-12 sees moral stories, science, adventures
+  // Adventures, Science & Mythology (Ages 9-12 or 6-12)
+  if (userAge.includes('9-12') || userAge.includes('6-12')) {
+    return !showAge.includes('2-5') && !showAge.includes('2-4'); // Big kids see science, mythology, adventures
   }
 
   return true;
@@ -271,7 +271,7 @@ export const Home: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span>
-                  Browsing personalized for <strong className="text-amber-400 font-bold">{activeProfile.name}</strong> ({activeProfile.ageGroup === '2-5' ? 'Ages 2-5 • Toddler & Rhymes' : activeProfile.ageGroup === '4-8' ? 'Ages 4-8 • Stories & Learning' : 'Ages 6-12 • Adventures & Science'})
+                  Browsing personalized for <strong className="text-amber-400 font-bold">{activeProfile.name}</strong> ({activeProfile.ageGroup.includes('2') ? 'Ages 2-4 • Toddlers & Rhymes' : activeProfile.ageGroup.includes('5') || activeProfile.ageGroup.includes('4') ? 'Ages 5-8 • Stories & Learning' : 'Ages 9-12 • Adventures & Science'})
                 </span>
               </div>
               <span className="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded-full font-bold">
