@@ -29,6 +29,8 @@ export const SearchFilterBar: React.FC<SearchFilterBarProps> = ({
     { code: 'ta', label: 'Tamil' },
     { code: 'te', label: 'Telugu' },
     { code: 'bn', label: 'Bengali' },
+    { code: 'mr', label: 'Marathi' },
+    { code: 'gu', label: 'Gujarati' },
   ];
 
   const hasActiveFilters =

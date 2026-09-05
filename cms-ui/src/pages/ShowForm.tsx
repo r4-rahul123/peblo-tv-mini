@@ -352,6 +352,8 @@ export const ShowForm: React.FC<ShowFormProps> = ({ show, onBack, onSaved }) => 
                     <option value="ta">Tamil (ta)</option>
                     <option value="te">Telugu (te)</option>
                     <option value="bn">Bengali (bn)</option>
+                    <option value="mr">Marathi (mr)</option>
+                    <option value="gu">Gujarati (gu)</option>
                   </select>
                 </div>
               </div>

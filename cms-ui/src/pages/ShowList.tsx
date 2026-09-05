@@ -96,6 +96,8 @@ export const ShowList: React.FC<ShowListProps> = ({ onSelectShow, onCreateShow }
           <option value='Tamil'>Tamil</option>
           <option value='Telugu'>Telugu</option>
           <option value='Bengali'>Bengali</option>
+          <option value='Marathi'>Marathi</option>
+          <option value='Gujarati'>Gujarati</option>
         </select>
       </div>
 
