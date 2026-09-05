@@ -9,26 +9,25 @@ import { SearchFilterBar } from '../components/SearchFilterBar';
 import { ShowDetailModal } from '../components/ShowDetailModal';
 import { Film, AlertCircle, RefreshCw } from 'lucide-react';
 
-const isShowSuitableForAge = (showAgeGroup: string | undefined, userAgeGroup: string | undefined): boolean => {
+const isShowSuitableForAge = (showAgeGroup: string | undefined, userAgeGroup: string | undefined, category?: string): boolean => {
   if (!userAgeGroup || userAgeGroup === 'All Ages') return true;
   if (!showAgeGroup) return true;
 
   const userAge = userAgeGroup.toLowerCase();
-  const showAge = showAgeGroup.toLowerCase();
 
-  // Toddlers (Ages 2-4 or 2-5)
+  // 1. Ages 2-4 (Toddlers: Rhymes & Bedtime Lullabies)
   if (userAge.includes('2-4') || userAge.includes('2-5')) {
-    return showAge.includes('2') || showAge.includes('3') || showAge.includes('4') || showAge.includes('rhyme') || showAge === '2-5';
+    return showAgeGroup === '2-5' || showAgeGroup === '2-6' || category === 'Early Learning';
   }
 
-  // Early Learning & Stories (Ages 5-8 or 4-8)
+  // 2. Ages 5-8 (Moral Stories & Jungle Fables)
   if (userAge.includes('5-8') || userAge.includes('4-8')) {
-    return showAge.includes('4') || showAge.includes('5') || showAge.includes('6') || showAge.includes('7') || showAge.includes('8') || showAge === '4-8';
+    return showAgeGroup === '4-8' || showAgeGroup === '5-11' || category === 'Moral Stories' || category === 'Animals & Wildlife';
   }
 
-  // Adventures, Science & Mythology (Ages 9-12 or 6-12)
+  // 3. Ages 9-12 (Science, Adventures & Mythology)
   if (userAge.includes('9-12') || userAge.includes('6-12')) {
-    return !showAge.includes('2-5') && !showAge.includes('2-4'); // Big kids see science, mythology, adventures
+    return showAgeGroup === '5-10' || showAgeGroup === '6-12' || category === 'Science & Nature' || category === 'Mythology & Culture';
   }
 
   return true;
@@ -89,7 +88,7 @@ export const Home: React.FC = () => {
         : catalog.sections?.[0]?.shows || [];
 
     const ageMatched = candidates.find((show: any) =>
-      isShowSuitableForAge(show.target_age_group, activeProfile?.ageGroup)
+      isShowSuitableForAge(show.target_age_group, activeProfile?.ageGroup, show.category)
     );
     return ageMatched || candidates[0] || null;
   }, [catalog, activeProfile]);
@@ -184,7 +183,7 @@ export const Home: React.FC = () => {
       .map((section: any) => ({
         ...section,
         shows: (section.shows || []).filter((show: PublishedShow) =>
-          isShowSuitableForAge(show.target_age_group, activeProfile.ageGroup)
+          isShowSuitableForAge(show.target_age_group, activeProfile.ageGroup, show.category)
         ),
       }))
       .filter((section: any) => section.shows && section.shows.length > 0);
