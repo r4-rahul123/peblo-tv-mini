@@ -1,4 +1,4 @@
-﻿# 🌟 Peblo TV Mini — Streaming Content Management & Viewer Platform
+# 🌟 Peblo TV Mini — Streaming Content Management & Viewer Platform
 
 > **Peblo Full-Stack Development Assignment Submission**  
 > **Author:** Rahul  
@@ -150,9 +150,9 @@ I implemented an abstract StorageProvider base class (ackend/app/services/stora
 
 | Component / Task | Focus Areas | Approximate Time Spent |
 | :--- | :--- | :--- |
-| **Part A: Backend & Schema Architecture** | Async SQLAlchemy ORM, PostgreSQL connection, Seed data loader, Shows/Seasons/Episodes REST APIs | ~2.5 Hours |
-| **Part B: Validation Engine & RBAC** | Aspect ratio (2:3, 16:9) & 200KB validator, Pre-publish blocker logic, 403 Forbidden enforcement | ~2.0 Hours |
-| **Part C: Atomic Publisher & Storage** | Two-phase atomic write, content_group multi-language collapsing, Season 0 trailer separation, R2/Local abstraction | ~2.5 Hours |
-| **Part D: Frontend Apps (Viewer UI & CMS)** | Netflix-style OTT streaming interface (Port 3000), CMS Studio & Publish Dashboard (Port 3001) | ~3.5 Hours |
-| **Part E: Testing, Docker & Documentation** | Pytest test suite (10/10 passing), Docker Compose multi-container setup, Part E architectural write-up | ~1.5 Hours |
-| **Total Development Time** | **End-to-end full stack platform** | **~12 Hours** |
+| **Part A: Backend & Schema Architecture** | Async SQLAlchemy ORM, PostgreSQL connection, Seed data loader, Shows/Seasons/Episodes REST APIs | ~3.0 Hours |
+| **Part B: Validation Engine & RBAC** | Aspect ratio (2:3, 16:9) & 200KB validator, Pre-publish blocker logic, 403 Forbidden enforcement | ~2.5 Hours |
+| **Part C: Atomic Publisher & Storage** | Two-phase atomic write, `content_group` multi-language collapsing, Season 0 trailer separation, R2/Local abstraction | ~3.0 Hours |
+| **Part D: Frontend Apps (Viewer UI & CMS)** | Netflix-style OTT streaming interface (Port 3000), Multi-Profile system, CMS Studio & Publish Dashboard (Port 3001) | ~4.5 Hours |
+| **Part E: Testing, Docker & Documentation** | Pytest test suite (10/10 passing), Docker Compose multi-container setup, Part E architectural write-up | ~2.0 Hours |
+| **Total Development Time** | **End-to-end full stack platform** | **~15 Hours** |
