@@ -183,11 +183,11 @@ export const Home: React.FC = () => {
     return catalog.sections
       .map((section: any) => ({
         ...section,
-        shows: section.shows.filter((show: PublishedShow) =>
+        shows: (section.shows || []).filter((show: PublishedShow) =>
           isShowSuitableForAge(show.target_age_group, activeProfile.ageGroup)
         ),
       }))
-      .filter((section: any) => section.shows.length > 0);
+      .filter((section: any) => section.shows && section.shows.length > 0);
   }, [catalog, activeProfile]);
 
   return (
