@@ -71,6 +71,7 @@ export const Home: React.FC = () => {
     },
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
+    retry: 2,
   });
 
   // Extract all unique section names for filter dropdown
@@ -103,13 +104,12 @@ export const Home: React.FC = () => {
 
     const allShowsMap = new Map<string, PublishedShow>();
     catalog.sections.forEach((sec) => {
-      sec.shows.forEach((show) => {
+      (sec.shows || []).forEach((show) => {
         allShowsMap.set(show.id, show);
       });
     });
 
     return Array.from(allShowsMap.values()).filter((show) => {
-      // Query filter
       if (filters.query?.trim()) {
         const q = filters.query.toLowerCase().trim();
         const matchTitle = show.title.toLowerCase().includes(q);
@@ -119,18 +119,8 @@ export const Home: React.FC = () => {
         );
         if (!matchTitle && !matchSynopsis && !matchEpisodes) return false;
       }
-
-      // Section filter
-      if (filters.section && show.section !== filters.section) {
-        return false;
-      }
-
-      // Category filter
-      if (filters.category && show.category !== filters.category) {
-        return false;
-      }
-
-      // Language filter
+      if (filters.section && show.section !== filters.section) return false;
+      if (filters.category && show.category !== filters.category) return false;
       if (filters.language) {
         const hasLang = show.seasons?.some((s) =>
           s.episodes?.some(
@@ -141,10 +131,28 @@ export const Home: React.FC = () => {
         );
         if (!hasLang) return false;
       }
-
       return true;
     });
   }, [catalog, filters, isFiltering]);
+
+  // *** ALL HOOKS ABOVE THIS LINE — no hooks after early returns ***
+
+  // Dynamic age-filtered sections based on active profile
+  const displaySections = useMemo(() => {
+    if (!catalog?.sections) return [];
+    if (!activeProfile || activeProfile.ageGroup === 'All Ages') return catalog.sections;
+
+    return catalog.sections
+      .map((section: any) => ({
+        ...section,
+        shows: (section.shows || []).filter((show: PublishedShow) =>
+          isShowSuitableForAge(show.target_age_group, activeProfile.ageGroup, show.category)
+        ),
+      }))
+      .filter((section: any) => section.shows && section.shows.length > 0);
+  }, [catalog, activeProfile]);
+
+  // --- RENDER ---
 
   if (isLoading) {
     return (
@@ -173,21 +181,6 @@ export const Home: React.FC = () => {
       </div>
     );
   }
-
-  // Dynamic age-filtered sections based on active profile
-  const displaySections = useMemo(() => {
-    if (!catalog?.sections) return [];
-    if (!activeProfile || activeProfile.ageGroup === 'All Ages') return catalog.sections;
-
-    return catalog.sections
-      .map((section: any) => ({
-        ...section,
-        shows: (section.shows || []).filter((show: PublishedShow) =>
-          isShowSuitableForAge(show.target_age_group, activeProfile.ageGroup, show.category)
-        ),
-      }))
-      .filter((section: any) => section.shows && section.shows.length > 0);
-  }, [catalog, activeProfile]);
 
   return (
     <div className="space-y-10 pb-20">
@@ -270,7 +263,7 @@ export const Home: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span>
-                  Browsing personalized for <strong className="text-amber-400 font-bold">{activeProfile?.name || 'Child'}</strong> ({String(activeProfile?.ageGroup || '').includes('2') ? 'Ages 2-4 • Toddlers & Rhymes' : String(activeProfile?.ageGroup || '').includes('5') || String(activeProfile?.ageGroup || '').includes('4') ? 'Ages 5-8 • Stories & Learning' : 'Ages 9-12 • Adventures & Science'})
+                  Browsing personalized for <strong className="text-amber-400 font-bold">{activeProfile.name || 'Child'}</strong> ({String(activeProfile.ageGroup || '').includes('2') ? 'Ages 2-4 • Toddlers & Rhymes' : String(activeProfile.ageGroup || '').includes('5') || String(activeProfile.ageGroup || '').includes('4') ? 'Ages 5-8 • Stories & Learning' : 'Ages 9-12 • Adventures & Science'})
                 </span>
               </div>
               <span className="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded-full font-bold">
