@@ -9,8 +9,33 @@ import { SearchFilterBar } from '../components/SearchFilterBar';
 import { ShowDetailModal } from '../components/ShowDetailModal';
 import { Film, AlertCircle, RefreshCw } from 'lucide-react';
 
+const isShowSuitableForAge = (showAgeGroup: string | undefined, userAgeGroup: string | undefined): boolean => {
+  if (!userAgeGroup || userAgeGroup === 'All Ages') return true;
+  if (!showAgeGroup) return true;
+
+  const userAge = userAgeGroup.toLowerCase();
+  const showAge = showAgeGroup.toLowerCase();
+
+  // Toddlers (2-5)
+  if (userAge.includes('2-5')) {
+    return showAge.includes('2') || showAge.includes('3') || showAge.includes('4') || showAge.includes('2-5');
+  }
+
+  // Early Learning (4-8)
+  if (userAge.includes('4-8')) {
+    return showAge.includes('2-5') || showAge.includes('4-8') || showAge.includes('4') || showAge.includes('5') || showAge.includes('6');
+  }
+
+  // Older Kids (6-12)
+  if (userAge.includes('6-12')) {
+    return !showAge.includes('2-5'); // 6-12 sees moral stories, science, adventures
+  }
+
+  return true;
+};
+
 export const Home: React.FC = () => {
-  const { user, openLoginModal, pendingShow } = useViewerAuth();
+  const { activeProfile, user, openLoginModal, pendingShow } = useViewerAuth();
   const [selectedShow, setSelectedShow] = useState<PublishedShow | null>(null);
   const [filters, setFilters] = useState<SearchFilterParams>({
     query: '',
@@ -55,15 +80,19 @@ export const Home: React.FC = () => {
     return catalog.sections.map((s: any) => s.section_name || s.name);
   }, [catalog]);
 
-  // Featured show for Hero Banner
+  // Featured show for Hero Banner adapted to profile age
   const featuredShow = useMemo(() => {
     if (!catalog) return null;
-    if (catalog.featured_shows && catalog.featured_shows.length > 0) {
-      return catalog.featured_shows[0];
-    }
-    // Fallback to first show of first section
-    return catalog.sections?.[0]?.shows?.[0] || null;
-  }, [catalog]);
+    const candidates =
+      catalog.featured_shows && catalog.featured_shows.length > 0
+        ? catalog.featured_shows
+        : catalog.sections?.[0]?.shows || [];
+
+    const ageMatched = candidates.find((show: any) =>
+      isShowSuitableForAge(show.target_age_group, activeProfile?.ageGroup)
+    );
+    return ageMatched || candidates[0] || null;
+  }, [catalog, activeProfile]);
 
   // Check if filtering is active
   const isFiltering =
@@ -146,6 +175,21 @@ export const Home: React.FC = () => {
     );
   }
 
+  // Dynamic age-filtered sections based on active profile
+  const displaySections = useMemo(() => {
+    if (!catalog?.sections) return [];
+    if (!activeProfile || activeProfile.ageGroup === 'All Ages') return catalog.sections;
+
+    return catalog.sections
+      .map((section: any) => ({
+        ...section,
+        shows: section.shows.filter((show: PublishedShow) =>
+          isShowSuitableForAge(show.target_age_group, activeProfile.ageGroup)
+        ),
+      }))
+      .filter((section: any) => section.shows.length > 0);
+  }, [catalog, activeProfile]);
+
   return (
     <div className="space-y-10 pb-20">
       {/* Featured Top Hero Banner (Shown when not actively searching) */}
@@ -222,7 +266,21 @@ export const Home: React.FC = () => {
       ) : (
         /* Standard Categorized Horizontal Section Rails */
         <section className="space-y-8">
-          {catalog.sections?.map((section: any) => (
+          {activeProfile && activeProfile.ageGroup !== 'All Ages' && (
+            <div className="flex items-center justify-between bg-slate-900/80 border border-amber-500/20 rounded-2xl px-4 py-2.5 text-xs text-slate-300">
+              <div className="flex items-center space-x-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>
+                  Browsing personalized for <strong className="text-amber-400 font-bold">{activeProfile.name}</strong> ({activeProfile.ageGroup === '2-5' ? 'Ages 2-5 • Toddler & Rhymes' : activeProfile.ageGroup === '4-8' ? 'Ages 4-8 • Stories & Learning' : 'Ages 6-12 • Adventures & Science'})
+                </span>
+              </div>
+              <span className="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded-full font-bold">
+                Age Filter Active
+              </span>
+            </div>
+          )}
+
+          {displaySections.map((section: any) => (
             <SectionRow
               key={section.section_name || section.name}
               title={section.section_name || section.name}
