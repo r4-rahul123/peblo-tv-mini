@@ -144,7 +144,7 @@ cp .env.example .env
 | `SECRET_KEY` | `your-secret-key-change-in-production` | Cryptographic secret key used for session signing and auth token integrity. |
 | `ALGORITHM` | `HS256` | JWT encoding algorithm. |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | `1440` | Expiration window in minutes for access tokens (defaults to 24h). |
-| `DATABASE_URL` | `sqlite+aiosqlite:///./peblo.db` | Async SQLAlchemy connection string (SQLite for dev; PostgreSQL for production/Docker). |
+| `DATABASE_URL` | `sqlite+aiosqlite:///./peblo.db` | Async SQLAlchemy database connection string (SQLite for local dev; `postgresql+asyncpg://<user>:<password>@<host>:5432/<dbname>` for production/Docker). |
 | `STORAGE_BACKEND` | `local` | Storage provider strategy to use: `local` (filesystem storage) or `r2` (Cloudflare R2 / S3-compatible object storage). |
 | `LOCAL_STORAGE_DIR` | `./storage` | Filesystem directory used for storing published catalogues and uploaded artwork when `STORAGE_BACKEND=local`. |
 | `R2_ACCOUNT_ID` | `your-cloudflare-account-id` | Cloudflare R2 Account ID (used to construct S3 endpoint URL). |
