@@ -12,6 +12,7 @@ from app.schemas.schemas import PublishRunResponse
 
 router = APIRouter()
 
+@router.get("", summary="Viewer Catalogue Endpoint (no slash)")
 @router.get("/", summary="Viewer Catalogue Endpoint")
 async def get_catalogue(db: AsyncSession = Depends(get_db)):
     """

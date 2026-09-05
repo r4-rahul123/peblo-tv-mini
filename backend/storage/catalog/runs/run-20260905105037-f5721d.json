@@ -1,0 +1,82 @@
+{
+  "catalog_version": "run-20260905105037-f5721d",
+  "published_at": "2026-09-05T10:50:37.793435+00:00",
+  "published_by": "admin@test.com",
+  "total_shows": 1,
+  "total_episodes": 1,
+  "sections": [
+    {
+      "name": "Top Picks for You",
+      "section_name": "Top Picks for You",
+      "shows": [
+        {
+          "id": "test-show-1",
+          "title": "Bilingual Moti",
+          "synopsis": null,
+          "section": "Top Picks for You",
+          "category": null,
+          "target_age_group": null,
+          "is_featured": false,
+          "poster_url": "/storage/artwork/poster.jpg",
+          "banner_url": "/storage/artwork/banner.jpg",
+          "seasons": [
+            {
+              "season_number": 1,
+              "title": "Season 1",
+              "episodes": [
+                {
+                  "episode_number": 1,
+                  "content_group": "cg-1",
+                  "title": "Hello World",
+                  "default_title": "Hello World",
+                  "default_synopsis": null,
+                  "duration_seconds": 300,
+                  "thumbnail_url": "/storage/artwork/thumb.jpg",
+                  "default_language": "en",
+                  "available_languages": [
+                    "en",
+                    "hi"
+                  ],
+                  "variants": {
+                    "en": {
+                      "language": "en",
+                      "title": "Hello World",
+                      "synopsis": null,
+                      "video_url": null,
+                      "thumbnail_url": "/storage/artwork/thumb.jpg",
+                      "duration_seconds": 300
+                    },
+                    "hi": {
+                      "language": "hi",
+                      "title": "नमस्ते दुनिया",
+                      "synopsis": null,
+                      "video_url": null,
+                      "thumbnail_url": "/storage/artwork/thumb.jpg",
+                      "duration_seconds": 300
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "trailers": [
+            {
+              "episode_number": 1,
+              "content_group": "cg-trailer-1",
+              "title": "Official Trailer",
+              "synopsis": null,
+              "duration_seconds": 60,
+              "video_url": null,
+              "thumbnail_url": "/storage/artwork/thumb_t.jpg",
+              "available_languages": [
+                "en"
+              ]
+            }
+          ],
+          "total_episodes": 1
+        }
+      ]
+    }
+  ],
+  "featured_shows": []
+}
