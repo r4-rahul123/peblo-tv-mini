@@ -38,8 +38,8 @@ fix_*.py
 generate_assets.py
 
 # Storage & SQLite auxiliaries
-storage/
-backend/storage/
+/storage/
+/backend/storage/
 *.db-wal
 *.db-shm
 *.db-journal

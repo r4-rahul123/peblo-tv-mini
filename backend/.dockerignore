@@ -9,4 +9,4 @@ peblo.db-shm
 peblo.db-journal
 .ruff_cache
 tests
-storage
+/storage
