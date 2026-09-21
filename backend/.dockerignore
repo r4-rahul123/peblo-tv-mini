@@ -1,0 +1,12 @@
+__pycache__
+*.pyc
+.env
+.env.*
+!.env.example
+peblo.db
+peblo.db-wal
+peblo.db-shm
+peblo.db-journal
+.ruff_cache
+tests
+storage
