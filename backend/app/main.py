@@ -15,8 +15,11 @@ from app.api.endpoints import (
     shows,
     validation,
 )
+from sqlalchemy import select
+
 from app.core.config import settings
 from app.core.database import AsyncSessionLocal, engine, init_database_connection
+from app.models.models import Show
 from app.services.catalog_publisher import publish_catalog
 from app.services.seed_loader import load_seed_data
 
@@ -28,14 +31,23 @@ async def lifespan(app: FastAPI):
 
     try:
         async with AsyncSessionLocal() as session:
-            await load_seed_data(session)
+            # Check if shows exist in database
+            result = await session.execute(select(Show))
+            existing_shows = result.scalars().all()
+            if not existing_shows:
+                print("No shows found in database. Seeding sample shows...")
+                await load_seed_data(session, force_reload=True)
+
             # Automatically generate initial catalogue.json on startup
             try:
-                await publish_catalog(session, triggered_by="system-startup")
+                pub_result = await publish_catalog(session, triggered_by="system-startup")
+                print("Initial publish status:", pub_result.get("status"))
             except Exception as e:
                 print("Initial publish skipped or failed:", e)
     except Exception as e:
-        print("Initial seed data load skipped or failed:", e)
+        import traceback
+        print("Initial seed data load error:", e)
+        traceback.print_exc()
 
     yield
     # Shutdown

@@ -160,7 +160,8 @@ async def trigger_publish(
     """
     result = await publish_catalog(db, triggered_by=user.username)
     if not result.get("success"):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result)
+        from fastapi.encoders import jsonable_encoder
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=jsonable_encoder(result))
     _catalog_cache.clear()
     return result
 
@@ -205,22 +206,24 @@ async def list_publish_runs(
     return res.scalars().all()
 
 
+@router.get("/seed", summary="Seed Sample Shows and Publish Catalogue")
 @router.post("/seed", summary="Seed Sample Shows and Publish Catalogue")
 async def seed_catalogue(
-    force: bool = False,
+    force: bool = True,
     db: AsyncSession = Depends(get_db),
-    user: CurrentUser = Depends(require_editor),
 ):
     """
     Seeds initial show data into the database and publishes catalogue.json immediately.
-    Can be triggered anytime to restore sample data.
+    Can be triggered anytime to restore sample data via browser or API.
     """
+    from fastapi.encoders import jsonable_encoder
     from app.services.seed_loader import load_seed_data
 
     seed_res = await load_seed_data(db, force_reload=force)
     pub_res = await publish_catalog(db, triggered_by="manual-seed")
     _catalog_cache.clear()
     return {
+        "success": True,
         "seed_result": seed_res,
-        "publish_result": pub_res,
+        "publish_result": jsonable_encoder(pub_res),
     }
