@@ -1,11 +1,13 @@
 import json
+import logging
 from pathlib import Path
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.models import Episode, Season, Show
 
+logger = logging.getLogger("peblo.seed")
 SEED_FILE = Path(__file__).parent.parent / "data" / "seed_shows.json"
 
 
@@ -16,10 +18,18 @@ async def load_seed_data(db: AsyncSession, force_reload: bool = False):
     result = await db.execute(select(Show))
     existing_shows = result.scalars().all()
     if existing_shows and not force_reload:
-        return {"message": "Database already contains data. Seed skipped."}
+        return {"message": f"Database already contains {len(existing_shows)} shows. Seed skipped."}
 
     if not SEED_FILE.exists():
         return {"error": f"Seed file {SEED_FILE} not found."}
+
+    if force_reload and existing_shows:
+        # Clean existing records in reverse dependency order
+        await db.execute(delete(Episode))
+        await db.execute(delete(Season))
+        await db.execute(delete(Show))
+        await db.commit()
+        logger.info("Cleared existing shows, seasons, and episodes for reload.")
 
     with open(SEED_FILE, "r", encoding="utf-8") as f:
         shows_data = json.load(f)
@@ -33,14 +43,11 @@ async def load_seed_data(db: AsyncSession, force_reload: bool = False):
             category=s_data.get("category"),
             target_age_group=s_data.get("target_age_group", "4-8"),
             is_featured=s_data.get("is_featured", False),
-            status=s_data.get("status", "draft"),
+            status=s_data.get("status", "published"),
             poster_url=s_data.get("poster_url"),
             banner_url=s_data.get("banner_url"),
         )
-        if force_reload:
-            show = await db.merge(show)
-        else:
-            db.add(show)
+        db.add(show)
         await db.flush()
 
         for season_data in s_data.get("seasons", []):
@@ -49,10 +56,7 @@ async def load_seed_data(db: AsyncSession, force_reload: bool = False):
                 season_number=season_data.get("season_number", 1),
                 title=season_data.get("title"),
             )
-            if force_reload:
-                season = await db.merge(season)
-            else:
-                db.add(season)
+            db.add(season)
             await db.flush()
 
             for ep_data in season_data.get("episodes", []):
@@ -66,12 +70,10 @@ async def load_seed_data(db: AsyncSession, force_reload: bool = False):
                     language=ep_data.get("language", "en"),
                     video_url=ep_data.get("video_url"),
                     thumbnail_url=ep_data.get("thumbnail_url"),
-                    status=ep_data.get("status", "draft"),
+                    status=ep_data.get("status", "published"),
                 )
-                if force_reload:
-                    ep = await db.merge(ep)
-                else:
-                    db.add(ep)
+                db.add(ep)
 
     await db.commit()
+    logger.info("Successfully loaded %d shows into database.", len(shows_data))
     return {"message": f"Successfully loaded {len(shows_data)} shows into database."}

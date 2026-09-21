@@ -203,3 +203,24 @@ async def list_publish_runs(
         select(PublishRun).order_by(desc(PublishRun.created_at)).limit(limit)
     )
     return res.scalars().all()
+
+
+@router.post("/seed", summary="Seed Sample Shows and Publish Catalogue")
+async def seed_catalogue(
+    force: bool = False,
+    db: AsyncSession = Depends(get_db),
+    user: CurrentUser = Depends(require_editor),
+):
+    """
+    Seeds initial show data into the database and publishes catalogue.json immediately.
+    Can be triggered anytime to restore sample data.
+    """
+    from app.services.seed_loader import load_seed_data
+
+    seed_res = await load_seed_data(db, force_reload=force)
+    pub_res = await publish_catalog(db, triggered_by="manual-seed")
+    _catalog_cache.clear()
+    return {
+        "seed_result": seed_res,
+        "publish_result": pub_res,
+    }
