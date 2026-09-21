@@ -16,28 +16,33 @@ from app.api.endpoints import (
     validation,
 )
 from app.core.config import settings
-from app.core.database import AsyncSessionLocal, Base, engine
+from app.core.database import AsyncSessionLocal, engine, init_database_connection
 from app.services.catalog_publisher import publish_catalog
 from app.services.seed_loader import load_seed_data
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: Create tables if not exist and seed data
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    # Startup: Initialize DB with retries and fallback
+    await init_database_connection()
 
-    async with AsyncSessionLocal() as session:
-        await load_seed_data(session)
-        # Automatically generate initial catalogue.json on startup
-        try:
-            await publish_catalog(session, triggered_by="system-startup")
-        except Exception as e:
-            print("Initial publish skipped or failed:", e)
+    try:
+        async with AsyncSessionLocal() as session:
+            await load_seed_data(session)
+            # Automatically generate initial catalogue.json on startup
+            try:
+                await publish_catalog(session, triggered_by="system-startup")
+            except Exception as e:
+                print("Initial publish skipped or failed:", e)
+    except Exception as e:
+        print("Initial seed data load skipped or failed:", e)
 
     yield
     # Shutdown
-    await engine.dispose()
+    try:
+        await engine.dispose()
+    except Exception:
+        pass
 
 
 app = FastAPI(
