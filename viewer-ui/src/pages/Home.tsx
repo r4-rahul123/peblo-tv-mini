@@ -60,7 +60,7 @@ export const Home: React.FC = () => {
     }
   }, [user, pendingShow, setPendingShow]);
 
-  // Fetch published catalogue
+  // Fetch published catalogue with instant localStorage caching for 0ms load time
   const {
     data: catalog,
     isLoading,
@@ -70,11 +70,25 @@ export const Home: React.FC = () => {
     queryKey: ['publishedCatalog'],
     queryFn: async () => {
       const res = await api.get('/catalog');
+      if (res.data) {
+        try {
+          localStorage.setItem('peblo_cached_catalog', JSON.stringify(res.data));
+        } catch {}
+      }
       return res.data;
     },
-    staleTime: 5 * 1000,
+    initialData: () => {
+      try {
+        const cached = localStorage.getItem('peblo_cached_catalog');
+        return cached ? JSON.parse(cached) : undefined;
+      } catch {
+        return undefined;
+      }
+    },
+    staleTime: 30 * 1000,
     refetchOnWindowFocus: true,
-    retry: 2,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
   });
 
   // Extract all unique section names for filter dropdown
@@ -108,13 +122,17 @@ export const Home: React.FC = () => {
     const allShowsMap = new Map<string, PublishedShow>();
     catalog.sections.forEach((sec) => {
       (sec.shows || []).forEach((show) => {
-        allShowsMap.set(show.id, show);
+        if (!allShowsMap.has(show.id)) {
+          allShowsMap.set(show.id, show);
+        }
       });
     });
 
-    return Array.from(allShowsMap.values()).filter((show) => {
-      if (filters.query?.trim()) {
-        const q = filters.query.toLowerCase().trim();
+    const uniqueShows = Array.from(allShowsMap.values());
+    const q = filters.query?.toLowerCase().trim() || '';
+
+    return uniqueShows.filter((show) => {
+      if (q) {
         const matchTitle = show.title.toLowerCase().includes(q);
         const matchSynopsis = show.synopsis?.toLowerCase().includes(q);
         const matchEpisodes = show.seasons?.some((s) =>
@@ -159,9 +177,12 @@ export const Home: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-4">
+      <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-4 px-4 text-center">
         <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-slate-400 text-sm font-medium">Opening Peblo TV universe...</p>
+        <div className="space-y-1">
+          <p className="text-white text-base font-semibold">Opening Peblo TV Universe...</p>
+          <p className="text-slate-400 text-xs">Waking up cloud backend (first load takes a few moments on free tier)</p>
+        </div>
       </div>
     );
   }
