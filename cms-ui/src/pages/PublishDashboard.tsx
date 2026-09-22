@@ -222,112 +222,77 @@ export const PublishDashboard: React.FC<PublishDashboardProps> = ({ onRoleChange
   }
 
   return (
-    <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 16px 60px' }}>
+    <div className="max-w-4xl mx-auto px-3 sm:px-6 py-2 sm:py-6 space-y-5">
       {/* Title */}
-      <div style={{ marginBottom: '20px' }}>
-        <h1 style={{ fontSize: '22px', fontWeight: 'bold', color: '#fff', margin: 0 }}>Catalogue Publish Pipeline</h1>
-        <p style={{ color: '#94a3b8', fontSize: '13px', margin: '4px 0 0' }}>Pre-publish validation engine, atomic JSON generator, and publish audit log</p>
+      <div>
+        <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">Catalogue Publish Pipeline</h1>
+        <p className="text-xs sm:text-sm text-slate-400 mt-1">Pre-publish validation engine, atomic JSON generator, and publish audit log</p>
       </div>
 
       {/* Role Notice Banner */}
       {!isAdmin ? (
-        <div style={{
-          background: 'rgba(30, 58, 138, 0.4)',
-          border: '1px solid rgba(59, 130, 246, 0.5)',
-          borderRadius: '12px',
-          padding: '14px 18px',
-          marginBottom: '20px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '12px',
-        }}>
+        <div className="bg-blue-950/40 border border-blue-600/40 rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <div>
-            <div style={{ fontWeight: 'bold', color: '#93c5fd', fontSize: '13px', marginBottom: '3px' }}>
+            <div className="font-bold text-blue-300 text-xs sm:text-sm mb-1">
               🛡️ Current Role: Content Editor
             </div>
-            <div style={{ color: '#bfdbfe', fontSize: '12px' }}>
+            <div className="text-blue-200/80 text-xs leading-relaxed">
               You can review validation blockers and edit shows. <strong>Publishing &amp; rollback requires the Admin role.</strong>
             </div>
           </div>
           <button
             onClick={handleSwitchToAdmin}
-            style={{
-              background: '#9333ea',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '8px',
-              padding: '6px 14px',
-              fontSize: '12px',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-            }}
+            className="w-full sm:w-auto bg-purple-600 hover:bg-purple-500 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-md transition-all shrink-0"
           >
             Switch to Admin Role
           </button>
         </div>
       ) : (
-        <div style={{
-          background: 'rgba(88, 28, 135, 0.25)',
-          border: '1px solid rgba(168, 85, 247, 0.4)',
-          borderRadius: '12px',
-          padding: '10px 16px',
-          marginBottom: '20px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-        }}>
-          <span style={{ fontSize: '14px' }}>👑</span>
-          <span style={{ color: '#d8b4fe', fontSize: '12px', fontWeight: '600' }}>
-            Current Role: Admin (Publisher) — You have full authorization to publish and rollback catalogue.
+        <div className="bg-purple-950/30 border border-purple-600/30 rounded-2xl p-3 sm:p-4 flex items-center gap-2.5">
+          <span className="text-base">👑</span>
+          <span className="text-purple-200 text-xs sm:text-sm font-semibold">
+            Current Role: Admin (Publisher) — Full authorization to publish and rollback catalogue.
           </span>
         </div>
       )}
 
       {/* Publish Status Card */}
-      <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '14px', padding: '24px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 shadow-lg">
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-            <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: report?.is_publishable ? '#22c55e' : '#ef4444', display: 'inline-block' }} />
-            <span style={{ fontSize: '17px', fontWeight: 'bold', color: '#fff' }}>
+          <div className="flex items-center gap-2.5 mb-1.5">
+            <span className={`w-3 h-3 rounded-full ${report?.is_publishable ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+            <h2 className="text-base sm:text-lg font-bold text-white">
               {report?.is_publishable ? 'Catalogue Ready to Publish' : 'Publication Blocked'}
-            </span>
+            </h2>
           </div>
-          <p style={{ color: '#94a3b8', fontSize: '12px', margin: 0 }}>
+          <p className="text-xs text-slate-400 max-w-xl leading-relaxed">
             {report?.is_publishable
               ? `All business rules satisfied (${report.published_shows_count} shows, ${report.published_episodes_count} episodes). Ready for atomic distribution.`
               : `${report?.total_blockers || 0} blocking issue(s) detected. Resolve blockers below to enable publishing.`}
           </p>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
+        <div className="flex flex-col sm:items-end gap-1.5 shrink-0">
           <button
             onClick={handlePublish}
             disabled={publishing || !report?.is_publishable || !isAdmin}
-            style={{
-              background: !report?.is_publishable
-                ? '#334155'
+            className={`w-full sm:w-auto font-black px-6 py-3 rounded-xl text-xs sm:text-sm transition-all flex items-center justify-center space-x-2 shadow-lg ${
+              !report?.is_publishable
+                ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
                 : !isAdmin
-                ? '#1e293b'
-                : 'linear-gradient(135deg, #22c55e, #14b8a6)',
-              color: report?.is_publishable && isAdmin ? '#000' : '#94a3b8',
-              fontWeight: 'bold',
-              padding: '12px 24px',
-              borderRadius: '12px',
-              border: !isAdmin ? '1px solid #475569' : 'none',
-              cursor: publishing || !report?.is_publishable || !isAdmin ? 'not-allowed' : 'pointer',
-              fontSize: '14px',
-              opacity: publishing ? 0.7 : 1,
-            }}
+                ? 'bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-700'
+                : 'bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 hover:from-emerald-400 hover:to-teal-300 shadow-emerald-500/20'
+            }`}
           >
-            {publishing
-              ? '⏳ Publishing...'
-              : !isAdmin
-              ? 'Publish Disabled (Admin Only)'
-              : '🚀 Publish Catalogue'}
+            <span>
+              {publishing
+                ? '⏳ Publishing...'
+                : !isAdmin
+                ? 'Publish Disabled (Admin Only)'
+                : '🚀 Publish Catalogue'}
+            </span>
           </button>
           {!isAdmin && (
-            <span style={{ fontSize: '11px', color: '#93c5fd' }}>
+            <span className="text-[11px] text-blue-400 text-center sm:text-right">
               Switch to Admin role to publish
             </span>
           )}
@@ -336,22 +301,15 @@ export const PublishDashboard: React.FC<PublishDashboardProps> = ({ onRoleChange
 
       {/* Publish Message / Error Alert */}
       {publishMsg && (
-        <div style={{
-          padding: '12px 16px',
-          borderRadius: '10px',
-          marginBottom: '20px',
-          fontSize: '13px',
-          background: publishMsg.startsWith('✅') ? '#052e16' : '#450a0a',
-          color: publishMsg.startsWith('✅') ? '#86efac' : '#fca5a5',
-          border: `1px solid ${publishMsg.startsWith('✅') ? '#166534' : '#991b1b'}`,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}>
-          <span>{publishMsg}</span>
+        <div className={`p-3.5 rounded-xl text-xs flex justify-between items-center border ${
+          publishMsg.startsWith('✅')
+            ? 'bg-emerald-950/80 text-emerald-200 border-emerald-800'
+            : 'bg-red-950/80 text-red-200 border-red-800'
+        }`}>
+          <span className="leading-relaxed">{publishMsg}</span>
           <button
             onClick={() => setPublishMsg(null)}
-            style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '14px' }}
+            className="text-white hover:text-slate-300 ml-3 font-bold text-sm"
           >
             ✕
           </button>
@@ -359,58 +317,54 @@ export const PublishDashboard: React.FC<PublishDashboardProps> = ({ onRoleChange
       )}
 
       {/* Validation Blockers */}
-      <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #334155', paddingBottom: '12px', marginBottom: '16px' }}>
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg">
+        <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
           <div>
-            <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: '#fff', margin: 0 }}>Pre-Publish Blocker Report</h3>
-            <p style={{ color: '#94a3b8', fontSize: '11px', margin: '2px 0 0' }}>Actionable guidance for content editors</p>
+            <h3 className="text-sm sm:text-base font-bold text-white">Pre-Publish Blocker Report</h3>
+            <p className="text-[11px] text-slate-400">Actionable guidance for content editors</p>
           </div>
-          <span style={{
-            fontSize: '11px',
-            fontWeight: 'bold',
-            padding: '3px 10px',
-            borderRadius: '999px',
-            background: (report?.total_blockers || 0) === 0 ? '#052e16' : '#450a0a',
-            color: (report?.total_blockers || 0) === 0 ? '#86efac' : '#fca5a5',
-            border: `1px solid ${(report?.total_blockers || 0) === 0 ? '#166534' : '#991b1b'}`,
-          }}>
+          <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full border ${
+            (report?.total_blockers || 0) === 0
+              ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
+              : 'bg-red-950 text-red-300 border-red-800'
+          }`}>
             {report?.total_blockers || 0} Blockers
           </span>
         </div>
 
         {(report?.total_blockers || 0) === 0 ? (
-          <div style={{ textAlign: 'center', padding: '30px 0', color: '#22c55e' }}>
-            <div style={{ fontSize: '36px', marginBottom: '8px' }}>✅</div>
-            <div style={{ fontWeight: '600', fontSize: '14px' }}>All Checks Passed Cleanly</div>
-            <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '4px' }}>No missing artwork, duration errors, or duplicate content groups found.</div>
+          <div className="text-center py-6 text-emerald-400">
+            <div className="text-3xl mb-2">✅</div>
+            <div className="font-bold text-sm">All Checks Passed Cleanly</div>
+            <div className="text-slate-400 text-xs mt-1">No missing artwork, duration errors, or duplicate content groups found.</div>
           </div>
         ) : (
-          <div>
+          <div className="space-y-3">
             {Object.entries(report?.issues_by_show || {}).map(([showTitle, issues]) => (
-              <div key={showTitle} style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '10px', padding: '14px', marginBottom: '10px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                  <span style={{ fontWeight: 'bold', color: '#e2e8f0', fontSize: '13px' }}>{showTitle}</span>
-                  <span style={{ fontSize: '10px', background: '#450a0a', color: '#fca5a5', padding: '2px 8px', borderRadius: '4px', fontFamily: 'monospace' }}>{issues.length} issue(s)</span>
+              <div key={showTitle} className="bg-slate-950 border border-slate-800 rounded-xl p-3.5 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-slate-200 text-xs sm:text-sm truncate">{showTitle}</span>
+                  <span className="text-[10px] bg-red-950 text-red-300 border border-red-900 px-2 py-0.5 rounded font-mono shrink-0 ml-2">{issues.length} issue(s)</span>
                 </div>
                 {issues.map((issue, idx) => (
-                  <div key={idx} style={{ background: '#1e293b', border: '1px solid #450a0a', borderRadius: '8px', padding: '10px', marginBottom: '6px', fontSize: '12px' }}>
-                    <div style={{ marginBottom: '4px' }}>
-                      <span style={{ background: '#7f1d1d', color: '#fca5a5', fontWeight: 'bold', padding: '1px 6px', borderRadius: '3px', fontSize: '10px', marginRight: '8px' }}>{issue.severity}</span>
-                      <span style={{ color: '#e2e8f0', fontWeight: '600' }}>{issue.entity_title}</span>
+                  <div key={idx} className="bg-slate-900 border border-red-950 rounded-lg p-2.5 text-xs space-y-1">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="bg-red-900/80 text-red-200 font-bold px-1.5 py-0.2 rounded text-[10px]">{issue.severity}</span>
+                      <span className="text-slate-200 font-semibold">{issue.entity_title}</span>
                     </div>
-                    <div style={{ color: '#cbd5e1' }}>{issue.message}</div>
-                    <div style={{ color: '#fbbf24', fontWeight: '500', marginTop: '4px' }}>→ Action: {issue.action_required}</div>
+                    <div className="text-slate-300 text-[11px]">{issue.message}</div>
+                    <div className="text-amber-400 font-medium text-[11px]">→ Action: {issue.action_required}</div>
                   </div>
                 ))}
               </div>
             ))}
             {(report?.general_issues?.length || 0) > 0 && (
-              <div style={{ background: '#450a0a33', padding: '12px', borderRadius: '8px', marginTop: '10px' }}>
-                <h4 style={{ color: '#fca5a5', fontWeight: '600', marginBottom: '8px', fontSize: '13px' }}>General Issues</h4>
+              <div className="bg-red-950/20 border border-red-900/40 p-3 rounded-xl">
+                <h4 className="text-red-300 font-bold text-xs mb-2">General Issues</h4>
                 {report?.general_issues?.map((issue, i) => (
-                  <div key={i} style={{ color: '#fca5a5', fontSize: '12px', marginBottom: '4px' }}>
-                    <span style={{ fontFamily: 'monospace', marginRight: '8px' }}>[{issue.severity}]</span>
-                    {issue.message} — <span style={{ color: '#94a3b8' }}>{issue.action_required}</span>
+                  <div key={i} className="text-red-300 text-xs mb-1">
+                    <span className="font-mono mr-1.5">[{issue.severity}]</span>
+                    {issue.message} — <span className="text-slate-400">{issue.action_required}</span>
                   </div>
                 ))}
               </div>
@@ -420,67 +374,63 @@ export const PublishDashboard: React.FC<PublishDashboardProps> = ({ onRoleChange
       </div>
 
       {/* Publish History */}
-      <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '14px', padding: '24px' }}>
-        <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: '#fff', borderBottom: '1px solid #334155', paddingBottom: '12px', marginTop: 0, marginBottom: '16px' }}>
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg">
+        <h3 className="text-sm sm:text-base font-bold text-white border-b border-slate-800 pb-3 mb-4">
           Publish Run Audit History
         </h3>
 
         {runs.length === 0 ? (
-          <p style={{ color: '#64748b', fontSize: '13px', textAlign: 'center', padding: '20px 0' }}>No publish runs recorded yet.</p>
+          <p className="text-slate-500 text-xs sm:text-sm text-center py-6">No publish runs recorded yet.</p>
         ) : (
-          <div>
+          <div className="divide-y divide-slate-800">
             {runs.map((run, idx) => (
-              <div key={run.run_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: idx < runs.length - 1 ? '1px solid #334155' : 'none', fontSize: '12px' }}>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                    <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#e2e8f0' }}>{run.run_id}</span>
-                    <span style={{
-                      fontSize: '10px',
-                      padding: '2px 8px',
-                      borderRadius: '4px',
-                      fontWeight: 'bold',
-                      background: run.status === 'SUCCESS' ? '#052e16' : '#450a0a',
-                      color: run.status === 'SUCCESS' ? '#86efac' : '#fca5a5',
-                    }}>
+              <div key={run.run_id} className="py-3.5 space-y-2.5">
+                {/* Top Row: Run ID, Badges, and Stats */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-mono font-bold text-xs text-slate-200 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+                      {run.run_id}
+                    </span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                      run.status === 'SUCCESS' ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-red-950 text-red-300 border border-red-800'
+                    }`}>
                       {run.status}
                     </span>
                     {idx === 0 && run.status === 'SUCCESS' && (
-                      <span style={{ fontSize: '9px', background: '#f59e0b22', color: '#fbbf24', border: '1px solid #f59e0b44', padding: '1px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
+                      <span className="text-[9px] bg-amber-500/15 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-black tracking-wide">
                         ACTIVE LIVE
                       </span>
                     )}
                   </div>
-                  <div style={{ color: '#94a3b8' }}>
-                    Triggered by <span style={{ color: '#cbd5e1', fontWeight: '600' }}>{run.triggered_by}</span> &bull;{' '}
-                    <span style={{ color: '#f8fafc' }}>{formatDate(run.created_at)}</span>
+                  <div className="text-slate-400 font-mono text-[11px] sm:text-right">
+                    <span>{run.shows_count} shows • {run.episodes_count} episodes • {run.sections_count} sections</span>
                   </div>
-                  {run.error_message && <div style={{ color: '#fca5a5', fontSize: '11px', marginTop: '2px' }}>{run.error_message}</div>}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ textAlign: 'right', color: '#94a3b8', fontFamily: 'monospace', fontSize: '11px' }}>
-                    <div>{run.shows_count} shows / {run.episodes_count} ep</div>
-                    <div style={{ color: '#64748b' }}>{run.sections_count} sections</div>
+
+                {/* Bottom Row: Metadata & Responsive Rollback Button */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                  <div className="text-slate-400 text-[11px]">
+                    Triggered by <span className="text-slate-200 font-semibold">{run.triggered_by}</span> &bull;{' '}
+                    <span className="text-slate-300">{formatDate(run.created_at)}</span>
                   </div>
                   {run.status === 'SUCCESS' && idx !== 0 && (
-                    <button
-                      onClick={() => handleRollback(run.run_id)}
-                      disabled={!isAdmin}
-                      style={{
-                        background: isAdmin ? '#334155' : '#1e293b',
-                        color: isAdmin ? '#e2e8f0' : '#64748b',
-                        border: '1px solid #475569',
-                        padding: '5px 12px',
-                        borderRadius: '8px',
-                        fontSize: '11px',
-                        fontWeight: '600',
-                        cursor: isAdmin ? 'pointer' : 'not-allowed',
-                      }}
-                      title={isAdmin ? `Rollback to ${run.run_id}` : 'Switch to Admin role to rollback'}
-                    >
-                      ↩ Rollback
-                    </button>
+                    <div className="pt-1 sm:pt-0">
+                      <button
+                        onClick={() => handleRollback(run.run_id)}
+                        disabled={!isAdmin}
+                        className={`w-full sm:w-auto px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center space-x-1.5 ${
+                          isAdmin
+                            ? 'bg-slate-800 hover:bg-purple-600 text-slate-200 hover:text-white border border-slate-700 cursor-pointer shadow-sm'
+                            : 'bg-slate-950 text-slate-600 border border-slate-800 cursor-not-allowed'
+                        }`}
+                        title={isAdmin ? `Rollback to ${run.run_id}` : 'Switch to Admin role to rollback'}
+                      >
+                        <span>↩ Rollback to this version</span>
+                      </button>
+                    </div>
                   )}
                 </div>
+                {run.error_message && <div className="text-red-400 text-[11px] mt-1">{run.error_message}</div>}
               </div>
             ))}
           </div>
