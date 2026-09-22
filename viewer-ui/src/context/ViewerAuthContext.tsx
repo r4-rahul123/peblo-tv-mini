@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { PublishedShow } from '../types';
+import { BACKEND_URL } from '../api/client';
 
 export interface UserProfile {
   id: string;
@@ -107,7 +108,7 @@ export const ViewerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       const token = localStorage.getItem(TOKEN_KEY);
       if (token) {
         try {
-          const res = await fetch('/api/v1/auth/me', {
+          const res = await fetch(`${BACKEND_URL}/api/v1/auth/me`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           if (res.ok) {
@@ -138,7 +139,7 @@ export const ViewerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
       // If no token or not logged in, try default demo family login
       try {
-        const demoRes = await fetch('/api/v1/auth/login', {
+        const demoRes = await fetch(`${BACKEND_URL}/api/v1/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: 'family@peblo.tv', password: 'password123' }),
@@ -193,7 +194,7 @@ export const ViewerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           return { success: false, error: 'Password must be at least 4 characters.' };
         }
 
-        const res = await fetch('/api/v1/auth/signup', {
+        const res = await fetch(`${BACKEND_URL}/api/v1/auth/signup`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -239,7 +240,7 @@ export const ViewerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         return { success: false, error: 'Please enter your password.' };
       }
 
-      const res = await fetch('/api/v1/auth/login', {
+      const res = await fetch(`${BACKEND_URL}/api/v1/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -302,7 +303,7 @@ export const ViewerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     if (!cleanName) return false;
 
     try {
-      const res = await fetch('/api/v1/auth/profiles', {
+      const res = await fetch(`${BACKEND_URL}/api/v1/auth/profiles`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -344,7 +345,7 @@ export const ViewerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     if (!token) return;
 
     try {
-      const res = await fetch(`/api/v1/auth/profiles/${profileId}`, {
+      const res = await fetch(`${BACKEND_URL}/api/v1/auth/profiles/${profileId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BACKEND_URL = (import.meta as any).env?.VITE_BACKEND_URL || '';
+export const BACKEND_URL = (import.meta as any).env?.VITE_BACKEND_URL || '';
 
 let currentRole = localStorage.getItem('peblo_role') || 'admin';
 

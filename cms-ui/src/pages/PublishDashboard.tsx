@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { getStoredRole, setStoredRole } from '../api/client';
+import { getStoredRole, setStoredRole, BACKEND_URL } from '../api/client';
 
 interface ValidationIssue {
   entity_type: string;
@@ -64,8 +64,8 @@ export const PublishDashboard: React.FC<PublishDashboardProps> = ({ onRoleChange
     try {
       const headers = { 'X-User-Role': getStoredRole() };
       const [reportRes, runsRes] = await Promise.all([
-        fetch('/api/v1/admin/validation/report', { headers }),
-        fetch('/api/v1/admin/catalog/runs', { headers }),
+        fetch(`${BACKEND_URL}/api/v1/admin/validation/report`, { headers }),
+        fetch(`${BACKEND_URL}/api/v1/admin/catalog/runs`, { headers }),
       ]);
 
       if (!reportRes.ok) {
@@ -114,7 +114,7 @@ export const PublishDashboard: React.FC<PublishDashboardProps> = ({ onRoleChange
     setPublishing(true);
     setPublishMsg(null);
     try {
-      const res = await fetch('/api/v1/admin/catalog/publish', {
+      const res = await fetch(`${BACKEND_URL}/api/v1/admin/catalog/publish`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -150,7 +150,7 @@ export const PublishDashboard: React.FC<PublishDashboardProps> = ({ onRoleChange
     if (!window.confirm(`Are you sure you want to rollback catalogue to run ${runId}?`)) return;
 
     try {
-      const res = await fetch(`/api/v1/admin/catalog/rollback/${runId}`, {
+      const res = await fetch(`${BACKEND_URL}/api/v1/admin/catalog/rollback/${runId}`, {
         method: 'POST',
         headers: { 'X-User-Role': activeRole },
       });
