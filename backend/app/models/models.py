@@ -21,6 +21,11 @@ def generate_uuid():
     return str(uuid.uuid4())
 
 
+def utc_now():
+    """Return naive UTC datetime for cross-DB compatibility (SQLite + PostgreSQL asyncpg)."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
 class Show(Base):
     __tablename__ = "shows"
 
@@ -34,8 +39,8 @@ class Show(Base):
     status = Column(String(50), default="draft")  # draft, published, archived
     poster_url = Column(String(500), nullable=True)
     banner_url = Column(String(500), nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
     seasons = relationship(
         "Season",
@@ -59,7 +64,7 @@ class Season(Base):
         Integer, nullable=False, default=1
     )  # 0 is reserved for Trailers per spec
     title = Column(String(255), nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=utc_now)
 
     __table_args__ = (
         UniqueConstraint("show_id", "season_number", name="uq_show_season_number"),
@@ -95,8 +100,8 @@ class Episode(Base):
     video_url = Column(String(500), nullable=True)
     thumbnail_url = Column(String(500), nullable=True)
     status = Column(String(50), default="draft")  # draft, published
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
     __table_args__ = (
         UniqueConstraint("season_id", "content_group", "language", name="uq_season_content_group_language"),
@@ -118,7 +123,7 @@ class Artwork(Base):
     aspect_ratio = Column(Float, nullable=False)
     content_type = Column(String(100), nullable=False)
     uploaded_by = Column(String(100), nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=utc_now)
 
 
 class PublishRun(Base):
@@ -137,4 +142,4 @@ class PublishRun(Base):
     validation_snapshot = Column(
         Text, nullable=True
     )  # JSON snapshot of validation issues if any
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=utc_now)
