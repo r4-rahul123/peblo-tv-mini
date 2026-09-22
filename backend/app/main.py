@@ -40,6 +40,29 @@ async def lifespan(app: FastAPI):
                 print("No shows found in database. Seeding sample shows...")
                 await load_seed_data(session, force_reload=True)
 
+            # Check if demo family account exists
+            from app.models.models import ViewerAccount, UserProfileModel
+            from app.core.security import hash_password
+            demo_email = "family@peblo.tv"
+            acc_res = await session.execute(select(ViewerAccount).where(ViewerAccount.email == demo_email))
+            if not acc_res.scalar_one_or_none():
+                print("Seeding default demo family account (family@peblo.tv)...")
+                demo_acc = ViewerAccount(
+                    email=demo_email,
+                    password_hash=hash_password("password123"),
+                )
+                session.add(demo_acc)
+                await session.flush()
+                demo_profiles = [
+                    UserProfileModel(id="prof-kabir", account_id=demo_acc.id, name="Kabir", age_group="2-4", is_kid=True, avatar_color="from-amber-500 to-orange-400"),
+                    UserProfileModel(id="prof-siya", account_id=demo_acc.id, name="Siya", age_group="5-8", is_kid=True, avatar_color="from-purple-500 to-pink-500"),
+                    UserProfileModel(id="prof-aarav", account_id=demo_acc.id, name="Aarav", age_group="9-12", is_kid=True, avatar_color="from-emerald-500 to-teal-400"),
+                    UserProfileModel(id="prof-family", account_id=demo_acc.id, name="Family", age_group="All Ages", is_kid=False, avatar_color="from-blue-600 to-cyan-400"),
+                ]
+                session.add_all(demo_profiles)
+                await session.commit()
+                print("Default demo family account seeded successfully.")
+
             # Automatically generate initial catalogue.json on startup
             try:
                 pub_result = await publish_catalog(session, triggered_by="system-startup")
@@ -82,7 +105,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_origin_regex=r".*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -129,6 +152,21 @@ app.include_router(
 app.include_router(
     validation.router,
     prefix=f"{settings.API_V1_STR}/admin/validation",
+    tags=["Admin Validation"],
+)
+app.include_router(
+    catalog.router,
+    prefix="/admin/catalog",
+    tags=["Admin Catalog Publishing"],
+)
+app.include_router(
+    validation.router,
+    prefix="/admin/validation",
+    tags=["Admin Validation"],
+)
+app.include_router(
+    validation.router,
+    prefix=f"{settings.API_V1_STR}/validation",
     tags=["Admin Validation"],
 )
 

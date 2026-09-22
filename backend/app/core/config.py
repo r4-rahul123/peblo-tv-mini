@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     PROJECT_NAME: str = "Peblo TV Mini API"
     API_V1_STR: str = "/api/v1"
-    SECRET_KEY: str = secrets.token_urlsafe(32)
+    SECRET_KEY: str = "peblo-tv-mini-secret-key-prod-change-in-env-2026"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 1 day
 

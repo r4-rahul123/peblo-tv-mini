@@ -27,7 +27,7 @@ class LocalDiskStorageProvider(StorageProvider):
 
     def _safe_path(self, destination_path: str) -> Path:
         """Sanitize path to prevent directory traversal attacks."""
-        clean_path = destination_path.lstrip("/").replace("storage/", "")
+        clean_path = destination_path.lstrip("/").removeprefix("storage/")
         target_path = (self.base_dir / clean_path).resolve()
         if not target_path.is_relative_to(self.base_dir.resolve()):
             raise ValueError(f"Path traversal detected: {destination_path}")

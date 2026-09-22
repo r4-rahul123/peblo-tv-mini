@@ -175,7 +175,7 @@ cp .env.example .env
 
 ## 🧪 3. Automated Test Suite
 
-I wrote 10 comprehensive tests covering the riskiest parts of the pipeline:
+I wrote 12 comprehensive tests covering the riskiest parts of the pipeline:
 
 ```bash
 cd backend
@@ -185,9 +185,10 @@ pytest -v
 
 ### What is tested:
 - ✅ **Artwork Validation (`test_artwork.py`)**: Aspect ratio enforcement (2:3 for poster, 16:9 for banner/thumbnail), dimension checks ($\ge 300\text{px}$), and $200\text{ KB}$ ceiling limits.
-- ✅ **Atomic Publisher (`test_publisher.py`)**: Multi-language `content_group` collapsing (`available_languages: ["en", "hi"]`) and Season 0 trailer extraction.
+- ✅ **Atomic Publisher & Rollback (`test_publisher.py`)**: Multi-language `content_group` collapsing (`available_languages: ["en", "hi"]`), Season 0 trailer extraction, and 1-click snapshot rollback restoration.
 - ✅ **RBAC Security (`test_rbac.py`)**: Enforces that Editors receive `403 Forbidden` on publish while Admins succeed.
 - ✅ **Composed Search (`test_search.py`)**: Multi-field querying across titles, synopsis, categories, and languages.
+- ✅ **Server-Side Viewer Auth (`test_viewer_auth.py`)**: Full registration, salted SHA-256 password hashing & verification, JWT tokens, and multi-profile sync across devices.
 
 ---
 
@@ -237,6 +238,6 @@ I implemented an abstract `StorageProvider` base class (`backend/app/services/st
 | **Part A: Backend & Schema Architecture** | Async SQLAlchemy ORM, PostgreSQL connection, Seed data loader, Shows/Seasons/Episodes REST APIs | ~3.0 Hours |
 | **Part B: Validation Engine & RBAC** | Aspect ratio (2:3, 16:9) & 200KB validator, Pre-publish blocker logic, 403 Forbidden enforcement | ~2.5 Hours |
 | **Part C: Atomic Publisher & Storage** | Two-phase atomic write, `content_group` multi-language collapsing, Season 0 trailer separation, R2/Local abstraction | ~3.0 Hours |
-| **Part D: Frontend Apps (Viewer UI & CMS)** | Netflix-style OTT streaming interface (Port 3000), Multi-Profile system, CMS Studio & Publish Dashboard (Port 3001) | ~4.5 Hours |
-| **Part E: Testing, Docker & Documentation** | Pytest test suite (10/10 passing), Docker Compose multi-container setup, Part E architectural write-up | ~2.0 Hours |
+| **Part D: Frontend Apps (Viewer UI & CMS)** | Netflix-style OTT streaming interface (Port 3000), Cross-Device Server-Side Auth, CMS Studio & Publish Dashboard (Port 3001) | ~4.5 Hours |
+| **Part E: Testing, Docker & Documentation** | Pytest test suite (12/12 passing), Docker Compose multi-container setup, Part E architectural write-up | ~2.0 Hours |
 | **Total Development Time** | **End-to-end full stack platform** | **~15 Hours** |

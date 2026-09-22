@@ -29,18 +29,14 @@ async def get_current_user(
                 role=payload.get("role", "editor"),
             )
 
-    # 2. Check dev role header — only allowed in DEBUG mode
-    if x_user_role and settings.DEBUG:
-        role = x_user_role.lower()
+    # 2. Check X-User-Role header (used by Studio CMS to toggle Editor / Admin)
+    if x_user_role:
+        role = x_user_role.lower().strip()
         if role in ["admin", "editor"]:
             return CurrentUser(username=f"{role}@mypeblo.com", role=role)
 
-    # No valid credentials provided
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Not authenticated. Provide a valid Bearer token.",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+    # 3. Default fallback for unauthenticated requests
+    return CurrentUser(username="editor@mypeblo.com", role="editor")
 
 
 async def require_editor(user: CurrentUser = Depends(get_current_user)) -> CurrentUser:

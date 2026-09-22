@@ -91,3 +91,68 @@ async def test_catalog_content_group_collapsing(test_db):
     assert "en" in collapsed_ep["available_languages"]
     assert "hi" in collapsed_ep["available_languages"]
     assert len(collapsed_ep["variants"]) == 2
+
+
+@pytest.mark.asyncio
+async def test_catalog_rollback(test_db):
+    from app.services.catalog_publisher import rollback_to_run
+
+    show = Show(
+        id="test-show-rollback",
+        title="Rollback Show",
+        section="Featured",
+        status="published",
+        poster_url="/storage/artwork/poster.jpg",
+        banner_url="/storage/artwork/banner.jpg",
+    )
+    test_db.add(show)
+    await test_db.flush()
+
+    s1 = Season(show_id=show.id, season_number=1, title="Season 1")
+    test_db.add(s1)
+    await test_db.flush()
+
+    ep1 = Episode(
+        season_id=s1.id,
+        episode_number=1,
+        title="Ep 1",
+        duration_seconds=120,
+        content_group="cg-rb-1",
+        language="en",
+        thumbnail_url="/storage/artwork/thumb.jpg",
+        status="published",
+    )
+    test_db.add(ep1)
+    await test_db.commit()
+
+    # 1. Publish Run 1
+    res1 = await publish_catalog(test_db, triggered_by="admin@test.com")
+    assert res1["success"] is True
+    run_1_id = res1["run_id"]
+
+    # 2. Add second episode and Publish Run 2
+    ep2 = Episode(
+        season_id=s1.id,
+        episode_number=2,
+        title="Ep 2",
+        duration_seconds=180,
+        content_group="cg-rb-2",
+        language="en",
+        thumbnail_url="/storage/artwork/thumb2.jpg",
+        status="published",
+    )
+    test_db.add(ep2)
+    await test_db.commit()
+    test_db.expire_all()
+
+    res2 = await publish_catalog(test_db, triggered_by="admin@test.com")
+    assert res2["success"] is True
+    assert res2["episodes_count"] == 2
+
+    # 3. Rollback to Run 1
+    rb_res = await rollback_to_run(test_db, target_run_id=run_1_id, triggered_by="admin@test.com")
+    assert rb_res["success"] is True
+    assert rb_res["status"] == "SUCCESS"
+    assert rb_res["restored_from"] == run_1_id
+    assert rb_res["published_catalog"]["total_episodes"] == 1
+

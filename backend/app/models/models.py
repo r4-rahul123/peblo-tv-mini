@@ -143,3 +143,40 @@ class PublishRun(Base):
         Text, nullable=True
     )  # JSON snapshot of validation issues if any
     created_at = Column(DateTime, default=utc_now)
+
+
+class ViewerAccount(Base):
+    __tablename__ = "viewer_accounts"
+
+    id = Column(String(64), primary_key=True, default=generate_uuid, index=True)
+    email = Column(String(255), nullable=False, unique=True, index=True)
+    password_hash = Column(String(255), nullable=False)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
+
+    profiles = relationship(
+        "UserProfileModel",
+        back_populates="account",
+        cascade="all, delete-orphan",
+        order_by="UserProfileModel.created_at",
+    )
+
+
+class UserProfileModel(Base):
+    __tablename__ = "user_profiles"
+
+    id = Column(String(64), primary_key=True, default=generate_uuid, index=True)
+    account_id = Column(
+        String(64),
+        ForeignKey("viewer_accounts.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    name = Column(String(100), nullable=False)
+    age_group = Column(String(50), default="5-8")  # '2-4' | '5-8' | '9-12' | 'All Ages'
+    is_kid = Column(Boolean, default=True)
+    avatar_color = Column(String(100), default="from-amber-500 to-orange-400")
+    created_at = Column(DateTime, default=utc_now)
+
+    account = relationship("ViewerAccount", back_populates="profiles")
+

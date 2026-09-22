@@ -228,3 +228,47 @@ class PublishRunResponse(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+# Viewer Authentication & Profile Schemas
+class UserProfileCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    age_group: str = Field(default="5-8")
+
+
+class UserProfileResponse(BaseModel):
+    id: str
+    name: str
+    age_group: str
+    is_kid: bool
+    avatar_color: str
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ViewerSignUpRequest(BaseModel):
+    email: str = Field(..., min_length=3, max_length=255)
+    password: str = Field(..., min_length=4, max_length=128)
+    initial_name: str | None = None
+    age_group: str | None = "5-8"
+
+
+class ViewerLoginRequest(BaseModel):
+    email: str = Field(..., min_length=1, max_length=255)
+    password: str = Field(..., min_length=1)
+
+
+class ViewerAccountResponse(BaseModel):
+    id: str
+    email: str
+    profiles: list[UserProfileResponse] = Field(default_factory=list)
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AuthTokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    account: ViewerAccountResponse
+

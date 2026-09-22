@@ -32,7 +32,7 @@ export const ShowDetailModal: React.FC<ShowDetailModalProps> = ({ show, onClose 
   const [selectedLanguages, setSelectedLanguages] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    setSelectedSeasonNumber(1);
+    setSelectedSeasonNumber(regularSeasons[0]?.season_number || 1);
     setActiveTab('episodes');
     setSelectedLanguages({});
   }, [show?.id]);

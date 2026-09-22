@@ -27,10 +27,11 @@ async def create_episode(
     if not season:
         raise HTTPException(status_code=404, detail=f"Season '{season_id}' not found.")
 
-    # Enforce (content_group, language) uniqueness
+    # Enforce (content_group, language) uniqueness within season
     res_dup = await db.execute(
         select(Episode).where(
             and_(
+                Episode.season_id == season_id,
                 Episode.content_group == ep_in.content_group,
                 Episode.language == ep_in.language,
             )
@@ -39,7 +40,7 @@ async def create_episode(
     if res_dup.scalar_one_or_none():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"An episode with content_group '{ep_in.content_group}' and language '{ep_in.language}' already exists.",
+            detail=f"An episode with content_group '{ep_in.content_group}' and language '{ep_in.language}' already exists in this season.",
         )
 
     episode = Episode(season_id=season_id, **ep_in.model_dump())
@@ -75,6 +76,7 @@ async def update_episode(
         res_dup = await db.execute(
             select(Episode).where(
                 and_(
+                    Episode.season_id == ep.season_id,
                     Episode.content_group == new_cg,
                     Episode.language == new_lang,
                     Episode.id != ep.id,
@@ -84,7 +86,7 @@ async def update_episode(
         if res_dup.scalar_one_or_none():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Conflict: (content_group='{new_cg}', language='{new_lang}') already in use by another episode.",
+                detail=f"Conflict: (content_group='{new_cg}', language='{new_lang}') already in use by another episode in this season.",
             )
 
     for k, v in data.items():

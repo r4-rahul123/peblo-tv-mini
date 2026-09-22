@@ -309,6 +309,7 @@ export const ShowForm: React.FC<ShowFormProps> = ({ show, onBack, onSaved }) => 
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement;
                                 target.onerror = null;
+                                target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='70' viewBox='0 0 120 70'%3E%3Crect width='120' height='70' fill='%231e293b'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%2394a3b8' font-size='10'%3ENo Thumb%3C/text%3E%3C/svg%3E";
                               }}
                             />
                           ) : (

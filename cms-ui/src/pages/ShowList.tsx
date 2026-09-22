@@ -97,13 +97,13 @@ export const ShowList: React.FC<ShowListProps> = ({ onSelectShow, onCreateShow }
           className='bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-amber-500'
         >
           <option value=''>All Languages</option>
-          <option value='English'>English</option>
-          <option value='Hindi'>Hindi</option>
-          <option value='Tamil'>Tamil</option>
-          <option value='Telugu'>Telugu</option>
-          <option value='Bengali'>Bengali</option>
-          <option value='Marathi'>Marathi</option>
-          <option value='Gujarati'>Gujarati</option>
+          <option value='en'>English</option>
+          <option value='hi'>Hindi</option>
+          <option value='ta'>Tamil</option>
+          <option value='te'>Telugu</option>
+          <option value='bn'>Bengali</option>
+          <option value='mr'>Marathi</option>
+          <option value='gu'>Gujarati</option>
         </select>
       </div>
 
@@ -111,6 +111,12 @@ export const ShowList: React.FC<ShowListProps> = ({ onSelectShow, onCreateShow }
         <div className='py-20 text-center text-slate-500'>Loading shows...</div>
       ) : isError ? (
         <div className='p-8 text-center bg-red-950/20 border border-red-900 rounded-xl text-red-300'>Failed to load shows.</div>
+      ) : shows.length === 0 ? (
+        <div className='py-16 text-center space-y-3 bg-slate-900/40 rounded-2xl border border-slate-800 text-slate-400'>
+          <Film className='w-8 h-8 mx-auto text-slate-600' />
+          <h3 className='text-sm font-semibold text-slate-300'>No shows found</h3>
+          <p className='text-xs text-slate-500'>No shows match the selected language or search criteria.</p>
+        </div>
       ) : (
         <div className='space-y-6'>
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5'>
@@ -171,7 +177,6 @@ export const ShowList: React.FC<ShowListProps> = ({ onSelectShow, onCreateShow }
               );
             })}
           </div>
-          {shows?.length === 0 && !isLoading && <div className="text-center text-gray-400 py-8">No shows found.</div>}
 
           <div className='flex items-center justify-between bg-slate-900/60 p-4 rounded-xl border border-slate-800'>
             <button

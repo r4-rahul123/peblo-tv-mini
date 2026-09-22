@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.api.deps import CurrentUser, require_editor
 from app.core.database import get_db
-from app.models.models import Season, Show
+from app.models.models import Episode, Season, Show
 from app.schemas.schemas import ShowCreate, ShowResponse, ShowUpdate
 
 router = APIRouter()
@@ -18,6 +18,7 @@ async def list_shows(
     section: str | None = None,
     status_filter: str | None = Query(None, alias="status"),
     category: str | None = None,
+    language: str | None = None,
     q: str | None = None,
     limit: int = 50,
     offset: int = 0,
@@ -31,6 +32,24 @@ async def list_shows(
         query = query.where(Show.status == status_filter)
     if category:
         query = query.where(Show.category == category)
+    if language:
+        lang_clean = language.lower().strip()
+        lang_map = {
+            "english": ["en", "english"],
+            "hindi": ["hi", "hindi"],
+            "tamil": ["ta", "tamil"],
+            "telugu": ["te", "telugu"],
+            "bengali": ["bn", "bengali"],
+            "marathi": ["mr", "marathi"],
+            "gujarati": ["gu", "gujarati"],
+        }
+        target_langs = lang_map.get(lang_clean, [lang_clean])
+        show_subq = (
+            select(Season.show_id)
+            .join(Episode, Episode.season_id == Season.id)
+            .where(func.lower(Episode.language).in_(target_langs))
+        )
+        query = query.where(Show.id.in_(show_subq))
     if q:
         query = query.where(
             or_(Show.title.ilike(f"%{q}%"), Show.synopsis.ilike(f"%{q}%"))

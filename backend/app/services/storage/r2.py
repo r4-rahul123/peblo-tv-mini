@@ -41,7 +41,7 @@ class CloudflareR2StorageProvider(StorageProvider):
         destination_path: str,
         content_type: str = "image/jpeg",
     ) -> str:
-        clean_key = destination_path.lstrip("/").replace("storage/", "")
+        clean_key = destination_path.lstrip("/").removeprefix("storage/")
         await asyncio.to_thread(
             self.client.put_object,
             Bucket=self.bucket_name,
@@ -52,7 +52,7 @@ class CloudflareR2StorageProvider(StorageProvider):
         return f"{self.public_url}/{clean_key}"
 
     async def read_file(self, path: str) -> bytes:
-        clean_key = path.lstrip("/").replace("storage/", "")
+        clean_key = path.lstrip("/").removeprefix("storage/")
         try:
             response = await asyncio.to_thread(self.client.get_object, Bucket=self.bucket_name, Key=clean_key)
             return response["Body"].read()
@@ -60,7 +60,7 @@ class CloudflareR2StorageProvider(StorageProvider):
             raise FileNotFoundError(f"R2 Object {path} not found: {e}")
 
     async def atomic_write(self, content: str | bytes, destination_path: str) -> str:
-        clean_key = destination_path.lstrip("/").replace("storage/", "")
+        clean_key = destination_path.lstrip("/").removeprefix("storage/")
         data = content.encode("utf-8") if isinstance(content, str) else content
         await asyncio.to_thread(
             self.client.put_object,
@@ -72,7 +72,7 @@ class CloudflareR2StorageProvider(StorageProvider):
         return f"{self.public_url}/{clean_key}"
 
     async def file_exists(self, path: str) -> bool:
-        clean_key = path.lstrip("/").replace("storage/", "")
+        clean_key = path.lstrip("/").removeprefix("storage/")
         try:
             await asyncio.to_thread(self.client.head_object, Bucket=self.bucket_name, Key=clean_key)
             return True

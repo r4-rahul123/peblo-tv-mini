@@ -12,7 +12,7 @@ export const AppContent: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<'shows' | 'publish'>('shows');
   const [selectedShow, setSelectedShow] = useState<Show | null | undefined>(undefined);
   const [isCreatingShow, setIsCreatingShow] = useState(false);
-  const [, setRoleRefresh] = useState(0);
+  const [roleRefresh, setRoleRefresh] = useState(0);
 
   const handleRoleChange = () => {
     setRoleRefresh((prev) => prev + 1);
@@ -33,7 +33,7 @@ export const AppContent: React.FC = () => {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {currentTab === 'publish' ? (
-          <PublishDashboard />
+          <PublishDashboard key={roleRefresh} onRoleChange={handleRoleChange} />
         ) : isCreatingShow || selectedShow !== undefined ? (
           <ShowForm
             show={selectedShow}

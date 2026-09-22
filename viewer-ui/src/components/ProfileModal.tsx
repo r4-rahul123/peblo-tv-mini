@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Plus, Check, User, Trash2 } from 'lucide-react';
 import { useViewerAuth } from '../context/ViewerAuthContext';
+import { getProfileAvatarStyle } from '../utils/avatarUtils';
 
 export const ProfileModal: React.FC = () => {
   const { account, activeProfile, switchProfile, addProfile, deleteProfile, isProfileModalOpen, closeProfileModal } =
@@ -8,7 +9,7 @@ export const ProfileModal: React.FC = () => {
 
   const [isAdding, setIsAdding] = useState(false);
   const [newName, setNewName] = useState('');
-  const [newAgeGroup, setNewAgeGroup] = useState('4-8');
+  const [newAgeGroup, setNewAgeGroup] = useState('5-8');
   const [error, setError] = useState<string | null>(null);
 
   if (!isProfileModalOpen || !account) return null;
@@ -19,20 +20,20 @@ export const ProfileModal: React.FC = () => {
     setIsAdding(false);
   };
 
-  const handleAddSubmit = (e: React.FormEvent) => {
+  const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     if (!newName.trim()) {
       setError('Please enter a profile name.');
       return;
     }
-    const success = addProfile(newName.trim(), newAgeGroup);
+    const success = await addProfile(newName.trim(), newAgeGroup);
     if (success) {
       setNewName('');
       setIsAdding(false);
       closeProfileModal();
     } else {
-      setError('Maximum 4 profiles allowed per account.');
+      setError('Failed to add profile (maximum 4 profiles allowed).');
     }
   };
 
@@ -67,8 +68,9 @@ export const ProfileModal: React.FC = () => {
         {!isAdding ? (
           <div className="space-y-6">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {profiles.map((p) => {
+              {profiles.map((p, idx) => {
                 const isActive = p.id === activeProfile?.id;
+                const pStyle = getProfileAvatarStyle(p.avatarColor, idx);
                 return (
                   <div
                     key={p.id}
@@ -93,11 +95,12 @@ export const ProfileModal: React.FC = () => {
                     )}
 
                     <div
-                      className={`relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr ${p.avatarColor} flex items-center justify-center shadow-lg group-hover:scale-105 transition-all border-2 ${
+                      className={`relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-all border-2 ${
                         isActive ? 'border-amber-400 shadow-amber-500/30' : 'border-transparent group-hover:border-slate-400'
                       }`}
+                      style={{ background: pStyle.background, color: pStyle.textColor }}
                     >
-                      <span className="text-2xl sm:text-3xl font-black text-slate-950">
+                      <span className="text-2xl sm:text-3xl font-black">
                         {(p.name || 'P').charAt(0).toUpperCase()}
                       </span>
                       {isActive && (

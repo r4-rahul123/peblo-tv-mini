@@ -1,228 +1,416 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api, { getStoredRole } from '../api/client';
-import { ValidationReport, PublishRun } from '../types';
-import { UploadCloud, AlertCircle, CheckCircle2, ShieldAlert, RotateCcw } from 'lucide-react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { getStoredRole, setStoredRole } from '../api/client';
 
-const formatDateTime = (dateStr: string) => {
-  if (!dateStr) return '';
-  const utcStr = dateStr.endsWith('Z') || dateStr.includes('+') ? dateStr : `${dateStr}Z`;
-  return new Date(utcStr).toLocaleString();
+interface ValidationIssue {
+  entity_type: string;
+  entity_id: string;
+  entity_title: string;
+  severity: string;
+  field: string;
+  message: string;
+  action_required: string;
+}
+
+interface ValidationReport {
+  is_publishable: boolean;
+  total_blockers: number;
+  total_warnings: number;
+  published_shows_count: number;
+  published_episodes_count: number;
+  issues_by_show: Record<string, ValidationIssue[]>;
+  general_issues: ValidationIssue[];
+}
+
+interface PublishRun {
+  run_id: string;
+  triggered_by: string;
+  status: string;
+  shows_count: number;
+  episodes_count: number;
+  sections_count: number;
+  catalogue_path?: string;
+  error_message?: string;
+  created_at: string;
+}
+
+interface PublishDashboardProps {
+  onRoleChange?: () => void;
+}
+
+const safeJson = async (res: Response): Promise<any> => {
+  try {
+    const text = await res.text();
+    if (!text || !text.trim()) return null;
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
 };
 
-export const PublishDashboard: React.FC = () => {
-  const queryClient = useQueryClient();
-  const role = getStoredRole();
-  const isAdmin = role === 'admin';
+export const PublishDashboard: React.FC<PublishDashboardProps> = ({ onRoleChange }) => {
+  const [report, setReport] = useState<ValidationReport | null>(null);
+  const [runs, setRuns] = useState<PublishRun[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [publishing, setPublishing] = useState(false);
+  const [publishMsg, setPublishMsg] = useState<string | null>(null);
+  const [currentRole, setCurrentRole] = useState<'admin' | 'editor'>(getStoredRole());
 
-  const [publishMessage, setPublishMessage] = useState<string | null>(null);
-  const [publishError, setPublishError] = useState<string | null>(null);
+  const isAdmin = currentRole === 'admin';
 
-  const reportQuery = useQuery<ValidationReport>({
-    queryKey: ['validationReport'],
-    queryFn: async () => {
-      const res = await api.get('/admin/validation/report');
-      return res.data;
-    },
-    staleTime: 60 * 1000,
-  });
-  const report = reportQuery.data;
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const headers = { 'X-User-Role': getStoredRole() };
+      const [reportRes, runsRes] = await Promise.all([
+        fetch('/api/v1/admin/validation/report', { headers }),
+        fetch('/api/v1/admin/catalog/runs', { headers }),
+      ]);
 
-  const runsQuery = useQuery<PublishRun[]>({
-    queryKey: ['publishRuns'],
-    queryFn: async () => {
-      const res = await api.get('/admin/catalog/runs');
-      return res.data;
-    },
-  });
-  const runs = runsQuery.data || [];
-
-  if (reportQuery.isLoading || runsQuery.isLoading) {
-    return <div className="p-8 text-center text-gray-400">Loading dashboard...</div>;
-  }
-  if (reportQuery.isError || runsQuery.isError) {
-    return <div className="p-8 text-center text-red-400">Failed to load dashboard data. Please try again.</div>;
-  }
-
-  const publishMutation = useMutation({
-    mutationFn: async () => {
-      const res = await api.post('/admin/catalog/publish');
-      return res.data;
-    },
-    onSuccess: (data) => {
-      setPublishMessage(
-        `Catalogue successfully published! (Version: ${data.run_id}, ${data.shows_count} shows, ${data.episodes_count} episodes).`
-      );
-      setPublishError(null);
-      queryClient.invalidateQueries({ queryKey: ['publishRuns'] });
-      queryClient.invalidateQueries({ queryKey: ['validationReport'] });
-    },
-    onError: (err: any) => {
-      if (err.response?.status === 403) {
-        setPublishError('Forbidden: Only the Admin role can publish the catalogue. Switch to Admin in the top-right header.');
-      } else if (err.response?.data?.detail?.message) {
-        setPublishError(err.response.data.detail.message);
-      } else {
-        const detail = err.response?.data?.detail;
-        setPublishError(typeof detail === 'string' ? detail : Array.isArray(detail) ? detail.map((e: any) => e.msg || JSON.stringify(e)).join('; ') : JSON.stringify(detail) || 'Publish failed.');
+      if (!reportRes.ok) {
+        throw new Error(`Validation API failed: ${reportRes.status} ${reportRes.statusText}`);
       }
-      setPublishMessage(null);
-    },
-  });
-
-  const rollbackMutation = useMutation({
-    mutationFn: async (runId: string) => {
-      const res = await api.post(`/admin/catalog/rollback/${runId}`);
-      return res.data;
-    },
-    onSuccess: (data) => {
-      setPublishMessage(`Successfully restored & rolled back catalogue to run ${data.restored_from}!`);
-      setPublishError(null);
-      queryClient.invalidateQueries({ queryKey: ['publishRuns'] });
-      queryClient.invalidateQueries({ queryKey: ['validationReport'] });
-    },
-    onError: (err: any) => {
-      if (err.response?.status === 403) {
-        setPublishError('Forbidden: Only the Admin role can trigger catalogue rollbacks.');
-      } else {
-        const detail = err.response?.data?.detail;
-        setPublishError(typeof detail === 'string' ? detail : Array.isArray(detail) ? detail.map((e: any) => e.msg || JSON.stringify(e)).join('; ') : JSON.stringify(detail) || 'Catalogue rollback failed.');
+      if (!runsRes.ok) {
+        throw new Error(`Runs API failed: ${runsRes.status} ${runsRes.statusText}`);
       }
-      setPublishMessage(null);
-    },
-  });
+
+      const reportData = await safeJson(reportRes);
+      const runsData = await safeJson(runsRes);
+
+      setReport(reportData);
+      setRuns(Array.isArray(runsData) ? runsData : []);
+    } catch (err: any) {
+      console.error('Dashboard fetch error:', err);
+      setError(err.message || 'Failed to load dashboard data');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Keep role synchronized
+  useEffect(() => {
+    setCurrentRole(getStoredRole());
+  }, []);
+
+  const handleSwitchToAdmin = () => {
+    setStoredRole('admin');
+    setCurrentRole(getStoredRole());
+    if (onRoleChange) onRoleChange();
+    setPublishMsg(null);
+  };
+
+  const handlePublish = async () => {
+    const activeRole = getStoredRole();
+    if (activeRole !== 'admin') {
+      setPublishMsg('❌ Forbidden: Only Admin (Publisher) can publish the catalogue. Switch to Admin in the top-right header.');
+      return;
+    }
+
+    setPublishing(true);
+    setPublishMsg(null);
+    try {
+      const res = await fetch('/api/v1/admin/catalog/publish', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-Role': activeRole,
+        },
+      });
+      const data = await safeJson(res);
+      if (res.ok) {
+        setPublishMsg(`✅ Published Successfully! Version: ${data?.run_id || 'latest'}, ${data?.shows_count || 0} shows, ${data?.episodes_count || 0} episodes.`);
+        fetchData();
+      } else {
+        const errorDetail = data?.detail?.message || data?.detail || JSON.stringify(data);
+        if (res.status === 403) {
+          setPublishMsg(`❌ Forbidden: Only Admin can publish catalogue. Switch role to Admin.`);
+        } else {
+          setPublishMsg(`❌ Publish failed: ${typeof errorDetail === 'string' ? errorDetail : JSON.stringify(errorDetail)}`);
+        }
+      }
+    } catch (err: any) {
+      setPublishMsg(`❌ Error: ${err.message}`);
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const handleRollback = async (runId: string) => {
+    const activeRole = getStoredRole();
+    if (activeRole !== 'admin') {
+      setPublishMsg('❌ Forbidden: Only Admin (Publisher) can trigger catalogue rollbacks. Switch to Admin in the top-right header.');
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to rollback catalogue to run ${runId}?`)) return;
+
+    try {
+      const res = await fetch(`/api/v1/admin/catalog/rollback/${runId}`, {
+        method: 'POST',
+        headers: { 'X-User-Role': activeRole },
+      });
+      const data = await safeJson(res);
+      if (res.ok) {
+        setPublishMsg(`✅ Successfully rolled back catalogue to ${runId}!`);
+        fetchData();
+      } else {
+        if (res.status === 403) {
+          setPublishMsg(`❌ Forbidden: Only Admin can rollback catalogue.`);
+        } else {
+          setPublishMsg(`❌ Rollback failed: ${data?.detail || 'Unknown error'}`);
+        }
+      }
+    } catch (err: any) {
+      setPublishMsg(`❌ Error: ${err.message}`);
+    }
+  };
+
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    try {
+      let normalized = dateStr.trim();
+      // If datetime string doesn't have timezone offset or Z, append Z (it's UTC from backend)
+      if (!normalized.endsWith('Z') && !/[+-]\d{2}(:\d{2})?$/.test(normalized)) {
+        normalized = normalized.includes('T') ? `${normalized}Z` : `${normalized.replace(' ', 'T')}Z`;
+      }
+      const d = new Date(normalized);
+      if (isNaN(d.getTime())) {
+        return dateStr;
+      }
+      return d.toLocaleString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div style={{ padding: '60px', textAlign: 'center' }}>
+        <div style={{ fontSize: '18px', color: '#f59e0b', marginBottom: '10px' }}>⏳ Loading Dashboard...</div>
+        <div style={{ color: '#94a3b8', fontSize: '14px' }}>Fetching validation report and publish history</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ padding: '40px', textAlign: 'center', maxWidth: '500px', margin: '40px auto', background: '#1e293b', borderRadius: '16px', border: '1px solid #334155' }}>
+        <div style={{ fontSize: '40px', marginBottom: '12px' }}>⚠️</div>
+        <h3 style={{ color: '#fff', marginBottom: '8px', fontSize: '16px' }}>Dashboard Connection Error</h3>
+        <p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '16px' }}>{error}</p>
+        <button
+          onClick={fetchData}
+          style={{ background: '#f59e0b', color: '#000', fontWeight: 'bold', padding: '8px 20px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontSize: '13px' }}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto pb-16">
-      <div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">Catalogue Publish Pipeline</h1>
-        <p className="text-sm text-slate-400">Pre-publish validation engine, atomic JSON generator, and publish audit log</p>
+    <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 16px 60px' }}>
+      {/* Title */}
+      <div style={{ marginBottom: '20px' }}>
+        <h1 style={{ fontSize: '22px', fontWeight: 'bold', color: '#fff', margin: 0 }}>Catalogue Publish Pipeline</h1>
+        <p style={{ color: '#94a3b8', fontSize: '13px', margin: '4px 0 0' }}>Pre-publish validation engine, atomic JSON generator, and publish audit log</p>
       </div>
 
-      {!isAdmin && (
-        <div className="bg-blue-950/40 border border-blue-800/80 rounded-xl p-4 text-xs text-blue-200 flex items-start space-x-3">
-          <ShieldAlert className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <strong className="font-semibold text-blue-300 block">Current Role: Content Editor</strong>
-            <span>
-              You have permission to review validation blockers and edit shows. Publishing requires the <strong>Admin</strong> role (switchable in the top right).
-            </span>
+      {/* Role Notice Banner */}
+      {!isAdmin ? (
+        <div style={{
+          background: 'rgba(30, 58, 138, 0.4)',
+          border: '1px solid rgba(59, 130, 246, 0.5)',
+          borderRadius: '12px',
+          padding: '14px 18px',
+          marginBottom: '20px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '12px',
+        }}>
+          <div>
+            <div style={{ fontWeight: 'bold', color: '#93c5fd', fontSize: '13px', marginBottom: '3px' }}>
+              🛡️ Current Role: Content Editor
+            </div>
+            <div style={{ color: '#bfdbfe', fontSize: '12px' }}>
+              You can review validation blockers and edit shows. <strong>Publishing &amp; rollback requires the Admin role.</strong>
+            </div>
           </div>
+          <button
+            onClick={handleSwitchToAdmin}
+            style={{
+              background: '#9333ea',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '6px 14px',
+              fontSize: '12px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+            }}
+          >
+            Switch to Admin Role
+          </button>
+        </div>
+      ) : (
+        <div style={{
+          background: 'rgba(88, 28, 135, 0.25)',
+          border: '1px solid rgba(168, 85, 247, 0.4)',
+          borderRadius: '12px',
+          padding: '10px 16px',
+          marginBottom: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+        }}>
+          <span style={{ fontSize: '14px' }}>👑</span>
+          <span style={{ color: '#d8b4fe', fontSize: '12px', fontWeight: '600' }}>
+            Current Role: Admin (Publisher) — You have full authorization to publish and rollback catalogue.
+          </span>
         </div>
       )}
 
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
-        <div className="space-y-2 text-center md:text-left">
-          <div className="flex items-center justify-center md:justify-start space-x-2">
-            <span
-              className={`w-3 h-3 rounded-full ${
-                report?.is_publishable ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'
-              }`}
-            />
-            <h2 className="font-bold text-lg text-white">
+      {/* Publish Status Card */}
+      <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '14px', padding: '24px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+            <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: report?.is_publishable ? '#22c55e' : '#ef4444', display: 'inline-block' }} />
+            <span style={{ fontSize: '17px', fontWeight: 'bold', color: '#fff' }}>
               {report?.is_publishable ? 'Catalogue Ready to Publish' : 'Publication Blocked'}
-            </h2>
+            </span>
           </div>
-          <p className="text-xs text-slate-400 max-w-lg leading-relaxed">
+          <p style={{ color: '#94a3b8', fontSize: '12px', margin: 0 }}>
             {report?.is_publishable
               ? `All business rules satisfied (${report.published_shows_count} shows, ${report.published_episodes_count} episodes). Ready for atomic distribution.`
-              : `${report?.total_blockers || 0} blocking issue(s) detected across seed data and shows. Resolve blockers below to enable publishing.`}
+              : `${report?.total_blockers || 0} blocking issue(s) detected. Resolve blockers below to enable publishing.`}
           </p>
         </div>
-
-        <div className="flex flex-col items-center md:items-end space-y-2">
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
           <button
-            onClick={() => publishMutation.mutate()}
-            disabled={!report?.is_publishable || !isAdmin || publishMutation.isPending}
-            className={`px-6 py-3 rounded-xl font-bold text-sm flex items-center space-x-2 transition-all shadow-lg ${
-              report?.is_publishable && isAdmin
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 hover:from-emerald-400 hover:to-teal-400 shadow-emerald-500/20'
-                : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50'
-            }`}
+            onClick={handlePublish}
+            disabled={publishing || !report?.is_publishable || !isAdmin}
+            style={{
+              background: !report?.is_publishable
+                ? '#334155'
+                : !isAdmin
+                ? '#1e293b'
+                : 'linear-gradient(135deg, #22c55e, #14b8a6)',
+              color: report?.is_publishable && isAdmin ? '#000' : '#94a3b8',
+              fontWeight: 'bold',
+              padding: '12px 24px',
+              borderRadius: '12px',
+              border: !isAdmin ? '1px solid #475569' : 'none',
+              cursor: publishing || !report?.is_publishable || !isAdmin ? 'not-allowed' : 'pointer',
+              fontSize: '14px',
+              opacity: publishing ? 0.7 : 1,
+            }}
           >
-            <UploadCloud className="w-5 h-5" />
-            <span>{publishMutation.isPending ? 'Publishing...' : 'Publish Catalogue Now'}</span>
+            {publishing
+              ? '⏳ Publishing...'
+              : !isAdmin
+              ? 'Publish Disabled (Admin Only)'
+              : '🚀 Publish Catalogue'}
           </button>
-
-          {!isAdmin && report?.is_publishable && (
-            <span className="text-[11px] text-amber-400">Switch to Admin role to publish</span>
+          {!isAdmin && (
+            <span style={{ fontSize: '11px', color: '#93c5fd' }}>
+              Switch to Admin role to publish
+            </span>
           )}
         </div>
       </div>
 
-      {publishMessage && (
-        <div className="bg-emerald-950/60 border border-emerald-800 rounded-xl p-4 text-emerald-200 text-sm flex items-center space-x-3">
-          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-          <span>{publishMessage}</span>
-        </div>
-      )}
-
-      {publishError && (
-        <div className="bg-red-950/60 border border-red-800 rounded-xl p-4 text-red-200 text-sm flex items-start space-x-3">
-          <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-          <span>{publishError}</span>
-        </div>
-      )}
-
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-5">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-          <div>
-            <h3 className="font-bold text-base text-white">Pre-Publish Blocker Report</h3>
-            <p className="text-xs text-slate-400">Actionable guidance for content editors</p>
-          </div>
-          <span
-            className={`text-xs font-bold px-3 py-1 rounded-full border ${
-              report?.total_blockers === 0
-                ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
-                : 'bg-red-950 text-red-300 border-red-800'
-            }`}
+      {/* Publish Message / Error Alert */}
+      {publishMsg && (
+        <div style={{
+          padding: '12px 16px',
+          borderRadius: '10px',
+          marginBottom: '20px',
+          fontSize: '13px',
+          background: publishMsg.startsWith('✅') ? '#052e16' : '#450a0a',
+          color: publishMsg.startsWith('✅') ? '#86efac' : '#fca5a5',
+          border: `1px solid ${publishMsg.startsWith('✅') ? '#166534' : '#991b1b'}`,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}>
+          <span>{publishMsg}</span>
+          <button
+            onClick={() => setPublishMsg(null)}
+            style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '14px' }}
           >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Validation Blockers */}
+      <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #334155', paddingBottom: '12px', marginBottom: '16px' }}>
+          <div>
+            <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: '#fff', margin: 0 }}>Pre-Publish Blocker Report</h3>
+            <p style={{ color: '#94a3b8', fontSize: '11px', margin: '2px 0 0' }}>Actionable guidance for content editors</p>
+          </div>
+          <span style={{
+            fontSize: '11px',
+            fontWeight: 'bold',
+            padding: '3px 10px',
+            borderRadius: '999px',
+            background: (report?.total_blockers || 0) === 0 ? '#052e16' : '#450a0a',
+            color: (report?.total_blockers || 0) === 0 ? '#86efac' : '#fca5a5',
+            border: `1px solid ${(report?.total_blockers || 0) === 0 ? '#166534' : '#991b1b'}`,
+          }}>
             {report?.total_blockers || 0} Blockers
           </span>
         </div>
 
-        {report?.total_blockers === 0 ? (
-          <div className="py-8 text-center text-emerald-400 space-y-2">
-            <CheckCircle2 className="w-8 h-8 mx-auto text-emerald-500" />
-            <h4 className="font-semibold text-sm">All Checks Passed Cleanly</h4>
-            <p className="text-xs text-slate-400">No missing artwork, duration errors, or duplicate content groups found.</p>
+        {(report?.total_blockers || 0) === 0 ? (
+          <div style={{ textAlign: 'center', padding: '30px 0', color: '#22c55e' }}>
+            <div style={{ fontSize: '36px', marginBottom: '8px' }}>✅</div>
+            <div style={{ fontWeight: '600', fontSize: '14px' }}>All Checks Passed Cleanly</div>
+            <div style={{ color: '#94a3b8', fontSize: '12px', marginTop: '4px' }}>No missing artwork, duration errors, or duplicate content groups found.</div>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div>
             {Object.entries(report?.issues_by_show || {}).map(([showTitle, issues]) => (
-              <div key={showTitle} className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-bold text-sm text-slate-200">{showTitle}</h4>
-                  <span className="text-[10px] bg-red-950 text-red-400 border border-red-900 px-2 py-0.5 rounded font-mono">
-                    {issues.length} issue(s)
-                  </span>
+              <div key={showTitle} style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '10px', padding: '14px', marginBottom: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <span style={{ fontWeight: 'bold', color: '#e2e8f0', fontSize: '13px' }}>{showTitle}</span>
+                  <span style={{ fontSize: '10px', background: '#450a0a', color: '#fca5a5', padding: '2px 8px', borderRadius: '4px', fontFamily: 'monospace' }}>{issues.length} issue(s)</span>
                 </div>
-
-                <div className="space-y-2">
-                  {issues.map((issue, idx) => (
-                    <div key={idx} className="bg-slate-900/90 border border-red-950 rounded-lg p-3 text-xs space-y-1">
-                      <div className="flex items-center space-x-2">
-                        <span className="bg-red-900/60 text-red-300 font-bold px-1.5 py-0.2 rounded text-[10px]">
-                          {issue.severity}
-                        </span>
-                        <span className="font-semibold text-slate-200">{issue.entity_title}</span>
-                      </div>
-                      <p className="text-slate-300">{issue.message}</p>
-                      <p className="text-amber-400 font-medium pt-0.5">
-                        &rarr; Action: {issue.action_required}
-                      </p>
+                {issues.map((issue, idx) => (
+                  <div key={idx} style={{ background: '#1e293b', border: '1px solid #450a0a', borderRadius: '8px', padding: '10px', marginBottom: '6px', fontSize: '12px' }}>
+                    <div style={{ marginBottom: '4px' }}>
+                      <span style={{ background: '#7f1d1d', color: '#fca5a5', fontWeight: 'bold', padding: '1px 6px', borderRadius: '3px', fontSize: '10px', marginRight: '8px' }}>{issue.severity}</span>
+                      <span style={{ color: '#e2e8f0', fontWeight: '600' }}>{issue.entity_title}</span>
                     </div>
-                  ))}
-                </div>
+                    <div style={{ color: '#cbd5e1' }}>{issue.message}</div>
+                    <div style={{ color: '#fbbf24', fontWeight: '500', marginTop: '4px' }}>→ Action: {issue.action_required}</div>
+                  </div>
+                ))}
               </div>
             ))}
-            {(report?.general_issues?.length ?? 0) > 0 && (
-              <div className="mt-4 p-3 bg-red-900/30 rounded">
-                <h4 className="font-semibold text-red-400 mb-2">General Issues</h4>
-                {report?.general_issues?.map((issue: any, i: number) => (
-                  <div key={`general-${i}`} className="text-sm text-red-300 mb-1">
-                    <span className={`font-mono mr-2 ${issue.severity === 'BLOCKER' ? 'text-red-400' : 'text-yellow-400'}`}>[{issue.severity}]</span>
-                    {issue.message} — <span className="text-gray-400">{issue.action_required}</span>
+            {(report?.general_issues?.length || 0) > 0 && (
+              <div style={{ background: '#450a0a33', padding: '12px', borderRadius: '8px', marginTop: '10px' }}>
+                <h4 style={{ color: '#fca5a5', fontWeight: '600', marginBottom: '8px', fontSize: '13px' }}>General Issues</h4>
+                {report?.general_issues?.map((issue, i) => (
+                  <div key={i} style={{ color: '#fca5a5', fontSize: '12px', marginBottom: '4px' }}>
+                    <span style={{ fontFamily: 'monospace', marginRight: '8px' }}>[{issue.severity}]</span>
+                    {issue.message} — <span style={{ color: '#94a3b8' }}>{issue.action_required}</span>
                   </div>
                 ))}
               </div>
@@ -231,69 +419,65 @@ export const PublishDashboard: React.FC = () => {
         )}
       </div>
 
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-4">
-        <h3 className="font-bold text-base text-white border-b border-slate-800 pb-3">Publish Run Audit History</h3>
+      {/* Publish History */}
+      <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '14px', padding: '24px' }}>
+        <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: '#fff', borderBottom: '1px solid #334155', paddingBottom: '12px', marginTop: 0, marginBottom: '16px' }}>
+          Publish Run Audit History
+        </h3>
 
         {runs.length === 0 ? (
-          <p className="text-xs text-slate-500 text-center py-4">No publish runs recorded yet.</p>
+          <p style={{ color: '#64748b', fontSize: '13px', textAlign: 'center', padding: '20px 0' }}>No publish runs recorded yet.</p>
         ) : (
-          <div className="divide-y divide-slate-800/60">
+          <div>
             {runs.map((run, idx) => (
-              <div key={run.run_id} className="py-3 flex items-center justify-between text-xs">
-                <div className="space-y-1">
-                  <div className="flex items-center space-x-2">
-                    <span className="font-mono font-bold text-slate-200">{run.run_id}</span>
-                    <span
-                      className={`text-[10px] px-2 py-0.5 rounded font-bold border ${
-                        run.status === 'SUCCESS'
-                          ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
-                          : 'bg-red-950 text-red-300 border-red-800'
-                      }`}
-                    >
+              <div key={run.run_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: idx < runs.length - 1 ? '1px solid #334155' : 'none', fontSize: '12px' }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#e2e8f0' }}>{run.run_id}</span>
+                    <span style={{
+                      fontSize: '10px',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      fontWeight: 'bold',
+                      background: run.status === 'SUCCESS' ? '#052e16' : '#450a0a',
+                      color: run.status === 'SUCCESS' ? '#86efac' : '#fca5a5',
+                    }}>
                       {run.status}
                     </span>
                     {idx === 0 && run.status === 'SUCCESS' && (
-                      <span className="text-[9px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-1.5 py-0.2 rounded font-bold">
+                      <span style={{ fontSize: '9px', background: '#f59e0b22', color: '#fbbf24', border: '1px solid #f59e0b44', padding: '1px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
                         ACTIVE LIVE
                       </span>
                     )}
                   </div>
-                  <p className="text-slate-400">
-                    Triggered by <span className="text-slate-300 font-medium">{run.triggered_by}</span> &bull;{' '}
-                    {formatDateTime(run.created_at)}
-                  </p>
-                  {run.error_message && <p className="text-red-400 text-[11px]">{run.error_message}</p>}
-                </div>
-
-                <div className="flex items-center space-x-4">
-                  <div className="text-right text-slate-400 font-mono text-[11px]">
-                    <div>
-                      {run.shows_count} shows / {run.episodes_count} episodes
-                    </div>
-                    <div className="text-slate-500">{run.sections_count} sections</div>
+                  <div style={{ color: '#94a3b8' }}>
+                    Triggered by <span style={{ color: '#cbd5e1', fontWeight: '600' }}>{run.triggered_by}</span> &bull;{' '}
+                    <span style={{ color: '#f8fafc' }}>{formatDate(run.created_at)}</span>
                   </div>
-
+                  {run.error_message && <div style={{ color: '#fca5a5', fontSize: '11px', marginTop: '2px' }}>{run.error_message}</div>}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ textAlign: 'right', color: '#94a3b8', fontFamily: 'monospace', fontSize: '11px' }}>
+                    <div>{run.shows_count} shows / {run.episodes_count} ep</div>
+                    <div style={{ color: '#64748b' }}>{run.sections_count} sections</div>
+                  </div>
                   {run.status === 'SUCCESS' && idx !== 0 && (
                     <button
-                      onClick={() => {
-                        if (!isAdmin) {
-                          setPublishError('Action blocked: Please switch role to Admin (top right) to perform catalogue rollback.');
-                          return;
-                        }
-                        if (window.confirm(`Are you sure you want to rollback catalogue to run ${run.run_id}?`)) {
-                          rollbackMutation.mutate(run.run_id);
-                        }
+                      onClick={() => handleRollback(run.run_id)}
+                      disabled={!isAdmin}
+                      style={{
+                        background: isAdmin ? '#334155' : '#1e293b',
+                        color: isAdmin ? '#e2e8f0' : '#64748b',
+                        border: '1px solid #475569',
+                        padding: '5px 12px',
+                        borderRadius: '8px',
+                        fontSize: '11px',
+                        fontWeight: '600',
+                        cursor: isAdmin ? 'pointer' : 'not-allowed',
                       }}
-                      disabled={rollbackMutation.isPending}
-                      className={`${
-                        isAdmin
-                          ? 'bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-200 border-slate-700'
-                          : 'bg-slate-900 text-slate-500 border-slate-800 cursor-not-allowed'
-                      } border px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all shadow-sm disabled:opacity-50`}
-                      title={isAdmin ? "Rollback catalogue to this exact historical snapshot" : "Switch to Admin role to rollback"}
+                      title={isAdmin ? `Rollback to ${run.run_id}` : 'Switch to Admin role to rollback'}
                     >
-                      <RotateCcw className={`w-3 h-3 ${rollbackMutation.isPending ? 'animate-spin' : ''}`} />
-                      <span>{rollbackMutation.isPending ? 'Restoring...' : 'Rollback'}</span>
+                      ↩ Rollback
                     </button>
                   )}
                 </div>

@@ -1,12 +1,20 @@
 import axios from 'axios';
 
-const BACKEND_URL = (import.meta as any).env?.VITE_BACKEND_URL || 'http://localhost:8000';
+const BACKEND_URL = (import.meta as any).env?.VITE_BACKEND_URL || '';
 
 const api = axios.create({
   baseURL: `${BACKEND_URL}/api/v1`,
   headers: {
     'Content-Type': 'application/json',
   },
+});
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('peblo_viewer_jwt_token');
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`;
+  }
+  return config;
 });
 
 export const getMediaUrl = (url?: string | null): string => {

@@ -3,6 +3,7 @@ import { LogOut, LogIn, ChevronDown, Plus } from 'lucide-react';
 import { useViewerAuth } from '../context/ViewerAuthContext';
 import { LoginModal } from './LoginModal';
 import { ProfileModal } from './ProfileModal';
+import { getProfileAvatarStyle } from '../utils/avatarUtils';
 
 interface NavbarProps {}
 
@@ -11,7 +12,6 @@ export const Navbar: React.FC<NavbarProps> = () => {
     account,
     activeProfile,
     user,
-    login,
     logout,
     switchProfile,
     isLoginModalOpen,
@@ -34,6 +34,8 @@ export const Navbar: React.FC<NavbarProps> = () => {
 
   const profiles = account?.profiles || [];
   const canAddMore = profiles.length < 4;
+  const activeIdx = profiles.findIndex((p) => p.id === activeProfile?.id);
+  const activeAvatarStyle = getProfileAvatarStyle(activeProfile?.avatarColor, activeIdx >= 0 ? activeIdx : 0);
 
   return (
     <>
@@ -62,9 +64,8 @@ export const Navbar: React.FC<NavbarProps> = () => {
                   className="flex items-center space-x-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/50 px-3 py-1.5 rounded-full shadow-inner transition-all"
                 >
                   <div
-                    className={`w-6 h-6 rounded-md bg-gradient-to-tr ${
-                      activeProfile?.avatarColor || 'from-amber-500 to-yellow-400'
-                    } flex items-center justify-center text-slate-950 font-black text-xs shadow-sm`}
+                    className="w-6 h-6 rounded-md flex items-center justify-center font-black text-xs shadow-sm"
+                    style={{ background: activeAvatarStyle.background, color: activeAvatarStyle.textColor }}
                   >
                     <span className="text-[10px] font-black">{(activeProfile?.name || 'P').charAt(0).toUpperCase()}</span>
                   </div>
@@ -79,8 +80,9 @@ export const Navbar: React.FC<NavbarProps> = () => {
                     </div>
 
                     <div className="space-y-1">
-                      {profiles.map((p) => {
+                      {profiles.map((p, idx) => {
                         const isCurrent = p.id === activeProfile?.id;
+                        const pStyle = getProfileAvatarStyle(p.avatarColor, idx);
                         return (
                           <button
                             key={p.id}
@@ -94,7 +96,8 @@ export const Navbar: React.FC<NavbarProps> = () => {
                           >
                             <div className="flex items-center space-x-2">
                               <div
-                                className={`w-5 h-5 rounded-md bg-gradient-to-tr ${p.avatarColor || 'from-amber-500 to-yellow-400'} flex items-center justify-center text-slate-950 text-[9px] font-black`}
+                                className="w-5 h-5 rounded-md flex items-center justify-center text-[9px] font-black shadow-sm shrink-0"
+                                style={{ background: pStyle.background, color: pStyle.textColor }}
                               >
                                 {(p.name || 'P').charAt(0).toUpperCase()}
                               </div>
@@ -150,7 +153,6 @@ export const Navbar: React.FC<NavbarProps> = () => {
       <LoginModal
         isOpen={isLoginModalOpen}
         onClose={closeLoginModal}
-        onLogin={(email, initialName, ageGroup, isSignUp) => login(email, initialName, ageGroup, isSignUp)}
       />
 
       <ProfileModal />

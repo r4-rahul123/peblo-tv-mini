@@ -266,7 +266,7 @@ export const Home: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span>
-                  Browsing personalized for <strong className="text-amber-400 font-bold">{activeProfile.name || 'Child'}</strong> ({String(activeProfile.ageGroup || '').includes('2') ? 'Ages 2-4 • Toddlers & Rhymes' : String(activeProfile.ageGroup || '').includes('5') || String(activeProfile.ageGroup || '').includes('4') ? 'Ages 5-8 • Stories & Learning' : 'Ages 9-12 • Adventures & Science'})
+                  Browsing personalized for <strong className="text-amber-400 font-bold">{activeProfile.name || 'Child'}</strong> ({activeProfile.ageGroup === '2-4' ? 'Ages 2-4 • Toddlers & Rhymes' : activeProfile.ageGroup === '5-8' ? 'Ages 5-8 • Stories & Learning' : activeProfile.ageGroup === '9-12' ? 'Ages 9-12 • Adventures & Science' : `Ages ${activeProfile.ageGroup}`})
                 </span>
               </div>
               <span className="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded-full font-bold">

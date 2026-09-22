@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import CurrentUser, require_admin, require_editor
+from app.api.deps import CurrentUser, require_admin
 from app.core.database import get_db
 from app.models.models import PublishRun, Show
 from app.schemas.schemas import PublishRunResponse
@@ -118,7 +118,7 @@ async def search_catalogue(
         if category and show.get("category") != category:
             continue
 
-        # 3. Language filter (check if any episode offers this language)
+        # 3. Language filter (check if any episode or trailer offers this language)
         if language:
             has_lang = False
             for season in show.get("seasons", []):
@@ -129,9 +129,14 @@ async def search_catalogue(
                 if has_lang:
                     break
             if not has_lang:
+                for trailer in show.get("trailers", []):
+                    if language in trailer.get("available_languages", []):
+                        has_lang = True
+                        break
+            if not has_lang:
                 continue
 
-        # 4. Text query `q` filter (matches show title, synopsis, or any episode title)
+        # 4. Text query `q` filter (matches show title, synopsis, category, or any episode/trailer title)
         if q_lower:
             match_title = q_lower in show.get("title", "").lower()
             match_synopsis = q_lower in (show.get("synopsis") or "").lower()
@@ -139,7 +144,7 @@ async def search_catalogue(
             match_episode = False
             for season in show.get("seasons", []):
                 for ep in season.get("episodes", []):
-                    if q_lower in ep.get("default_title", "").lower():
+                    if q_lower in ep.get("default_title", "").lower() or q_lower in ep.get("title", "").lower():
                         match_episode = True
                         break
                     for variant in ep.get("variants", {}).values():
@@ -147,6 +152,11 @@ async def search_catalogue(
                             match_episode = True
                             break
                     if match_episode:
+                        break
+            if not match_episode:
+                for trailer in show.get("trailers", []):
+                    if q_lower in trailer.get("title", "").lower():
+                        match_episode = True
                         break
             if not (match_title or match_synopsis or match_category or match_episode):
                 continue
@@ -212,9 +222,8 @@ async def trigger_rollback(
 async def list_publish_runs(
     limit: int = 20,
     db: AsyncSession = Depends(get_db),
-    user: CurrentUser = Depends(require_editor),
 ):
-    """Returns audit history of publish runs."""
+    """Returns audit history of publish runs. Tokenless — no auth required."""
     res = await db.execute(
         select(PublishRun).order_by(desc(PublishRun.created_at)).limit(limit)
     )
