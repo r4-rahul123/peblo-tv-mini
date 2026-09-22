@@ -11,6 +11,7 @@ from app.services.storage import get_storage_provider
 router = APIRouter()
 
 
+@router.get("")
 @router.get("/")
 async def health_check(db: AsyncSession = Depends(get_db)):
     """

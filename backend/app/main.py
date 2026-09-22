@@ -130,6 +130,7 @@ app.mount("/storage", StaticFiles(directory=str(storage_path)), name="storage")
 
 # Include API Routers with API_V1_STR prefix (for frontend client requests)
 app.include_router(health.router, prefix="/health", tags=["Health"])
+app.include_router(health.router, prefix=f"{settings.API_V1_STR}/health", tags=["Health"])
 app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["Auth"])
 app.include_router(shows.router, prefix=f"{settings.API_V1_STR}/shows", tags=["Shows"])
 app.include_router(
