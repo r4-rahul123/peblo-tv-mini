@@ -122,9 +122,9 @@ export const ShowList: React.FC<ShowListProps> = ({ onSelectShow, onCreateShow }
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5'>
             {shows.map((show) => {
               return (
-                <div key={show.id} className='bg-slate-900/80 border border-slate-800 rounded-xl overflow-hidden hover:border-slate-700 transition-all flex flex-col justify-between group shadow-lg'>
+                <div key={show.id} className='bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden hover:border-amber-500/40 hover:shadow-xl hover:shadow-amber-500/5 transition-all flex flex-col justify-between group'>
                   <div>
-                    <div className='relative h-36 bg-slate-950 overflow-hidden'>
+                    <div className='relative h-40 bg-slate-950 overflow-hidden'>
                       {show.banner_url ? (
                         <img
                           src={getMediaUrl(show.banner_url)}
@@ -148,29 +148,29 @@ export const ShowList: React.FC<ShowListProps> = ({ onSelectShow, onCreateShow }
                       ) : (
                         <div className='w-full h-full flex items-center justify-center bg-slate-950 text-slate-600'><Film className='w-8 h-8' /></div>
                       )}
-                      <div className='absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent' />
+                      <div className='absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent' />
                       <div className='absolute top-3 right-3'>
-                        <span className={'text-[11px] font-semibold px-2.5 py-0.5 rounded-full border shadow-sm ' + (show.status === 'published' ? 'bg-emerald-950/80 text-emerald-300 border-emerald-700/80' : 'bg-amber-950/80 text-amber-300 border-amber-700/80')}>
+                        <span className={'text-[11px] font-bold px-2.5 py-0.5 rounded-full border shadow-md ' + (show.status === 'published' ? 'bg-emerald-950 text-emerald-300 border-emerald-700' : 'bg-amber-950 text-amber-300 border-amber-700')}>
                           {show.status.toUpperCase()}
                         </span>
                       </div>
                     </div>
 
-                    <div className='p-4 space-y-2'>
-                      <h3 className='font-bold text-base text-white line-clamp-1'>{show.title}</h3>
-                      <p className='text-xs text-slate-400 line-clamp-2 leading-relaxed'>{show.synopsis || 'No synopsis provided.'}</p>
-                      <div className='pt-2 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800/60'>
-                        <span className='flex items-center space-x-1'><Layers className='w-3.5 h-3.5 text-amber-500' /><span>{show.seasons?.length || 0} Seasons</span></span>
-                        <span className='bg-amber-500/10 text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded text-[10px] font-bold'>Ages {show.target_age_group || '4-8'}</span>
-                        <span className='bg-slate-800 px-1.5 py-0.5 rounded text-[10px] text-slate-300'>{show.category || 'General'}</span>
+                    <div className='p-4 space-y-2.5 bg-slate-900'>
+                      <h3 className='font-bold text-base text-white line-clamp-1 group-hover:text-amber-400 transition-colors'>{show.title}</h3>
+                      <p className='text-xs text-slate-300 line-clamp-2 leading-relaxed font-normal'>{show.synopsis || 'No synopsis provided.'}</p>
+                      <div className='pt-2.5 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800'>
+                        <span className='flex items-center space-x-1 font-medium text-slate-300'><Layers className='w-3.5 h-3.5 text-amber-400' /><span>{show.seasons?.length || 0} Seasons</span></span>
+                        <span className='bg-amber-500/15 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-md text-[10px] font-bold'>Ages {show.target_age_group || '4-8'}</span>
+                        <span className='bg-slate-800/80 border border-slate-700 px-2 py-0.5 rounded-md text-[10px] text-slate-300 font-medium'>{show.category || 'General'}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className='p-3 bg-slate-950/60 border-t border-slate-800 flex items-center justify-end space-x-2'>
-                    <button onClick={() => onSelectShow(show)} className='px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium transition-colors flex items-center space-x-1.5'>
+                  <div className='p-3 bg-slate-950/80 border-t border-slate-800 flex items-center justify-end space-x-2'>
+                    <button onClick={() => onSelectShow(show)} className='w-full sm:w-auto px-3.5 py-2 bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-200 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1.5 shadow-sm'>
                       <Edit3 className='w-3.5 h-3.5' />
-                      <span>Edit Show & Episodes</span>
+                      <span>Edit Show &amp; Episodes</span>
                     </button>
                   </div>
                 </div>
