@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -88,9 +89,21 @@ app.add_middleware(
 )
 
 # Mount local storage folder for artwork and catalogue file access
-storage_dir = os.path.abspath(settings.LOCAL_STORAGE_DIR)
-os.makedirs(storage_dir, exist_ok=True)
-app.mount("/storage", StaticFiles(directory=storage_dir), name="storage")
+candidate_dirs = [
+    Path(settings.LOCAL_STORAGE_DIR).resolve(),
+    Path(__file__).resolve().parent.parent / "storage",
+    Path(__file__).resolve().parent.parent.parent / "storage",
+]
+storage_path = candidate_dirs[0]
+for d in candidate_dirs:
+    if (d / "artwork").exists():
+        storage_path = d
+        break
+
+os.makedirs(storage_path, exist_ok=True)
+os.makedirs(storage_path / "artwork", exist_ok=True)
+os.makedirs(storage_path / "catalog", exist_ok=True)
+app.mount("/storage", StaticFiles(directory=str(storage_path)), name="storage")
 
 # Include API Routers with API_V1_STR prefix (for frontend client requests)
 app.include_router(health.router, prefix="/health", tags=["Health"])

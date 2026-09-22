@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import api, { getMediaUrl } from '../api/client';
+import api, { getMediaUrl, FALLBACK_BANNER, FALLBACK_POSTER } from '../api/client';
 import { Show } from '../types';
 import { Plus, Search, Layers, Film, Edit3 } from 'lucide-react';
 
@@ -120,9 +120,25 @@ export const ShowList: React.FC<ShowListProps> = ({ onSelectShow, onCreateShow }
                   <div>
                     <div className='relative h-36 bg-slate-950 overflow-hidden'>
                       {show.banner_url ? (
-                        <img src={getMediaUrl(show.banner_url)} alt={show.title} className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-300' />
+                        <img
+                          src={getMediaUrl(show.banner_url)}
+                          alt={show.title}
+                          className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-300'
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = FALLBACK_BANNER;
+                          }}
+                        />
                       ) : show.poster_url ? (
-                        <img src={getMediaUrl(show.poster_url)} alt={show.title} className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-300' />
+                        <img
+                          src={getMediaUrl(show.poster_url)}
+                          alt={show.title}
+                          className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-300'
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = FALLBACK_POSTER;
+                          }}
+                        />
                       ) : (
                         <div className='w-full h-full flex items-center justify-center bg-slate-950 text-slate-600'><Film className='w-8 h-8' /></div>
                       )}

@@ -9,7 +9,18 @@ from app.services.storage.base import StorageProvider
 
 class LocalDiskStorageProvider(StorageProvider):
     def __init__(self, base_dir: str = "./storage"):
-        self.base_dir = Path(base_dir)
+        resolved = Path(base_dir).resolve()
+        candidate_dirs = [
+            resolved,
+            Path(__file__).resolve().parent.parent.parent / "storage",
+            Path(__file__).resolve().parent.parent.parent.parent / "storage",
+        ]
+        chosen = resolved
+        for d in candidate_dirs:
+            if (d / "artwork").exists():
+                chosen = d
+                break
+        self.base_dir = chosen
         self.base_dir.mkdir(parents=True, exist_ok=True)
         (self.base_dir / "artwork").mkdir(parents=True, exist_ok=True)
         (self.base_dir / "catalog").mkdir(parents=True, exist_ok=True)
