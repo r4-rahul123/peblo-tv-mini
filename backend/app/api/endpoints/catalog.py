@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import CurrentUser, require_admin, require_editor
 from app.core.database import get_db
-from app.models.models import PublishRun
+from app.models.models import PublishRun, Show
 from app.schemas.schemas import PublishRunResponse
 from app.services.catalog_publisher import (
     CATALOG_DESTINATION_PATH,
@@ -16,7 +16,9 @@ from app.services.catalog_publisher import (
 )
 from app.services.storage import get_storage_provider
 import time as _time
+import logging
 
+logger = logging.getLogger("peblo.catalog")
 _catalog_cache: dict[str, tuple[float, dict]] = {}
 _CACHE_TTL = 60  # seconds
 
@@ -35,14 +37,27 @@ async def get_catalogue(db: AsyncSession = Depends(get_db)):
         data = await storage.read_file(CATALOG_DESTINATION_PATH)
         return json.loads(data.decode("utf-8"))
     except FileNotFoundError:
-        # Fallback: if not published yet, publish automatically for smooth local DX
-        result = await publish_catalog(db, triggered_by="system_init")
-        if result.get("success"):
-            return result.get("published_catalog")
+        # Fallback: if not published yet, auto-seed and publish
+        try:
+            from app.services.seed_loader import load_seed_data
+            res = await db.execute(select(Show).where(Show.status == "published"))
+            shows = res.scalars().all()
+            if not shows:
+                await load_seed_data(db, force_reload=True)
+
+            result = await publish_catalog(db, triggered_by="system_init")
+            if result.get("success") and result.get("published_catalog"):
+                return result.get("published_catalog")
+        except Exception as e:
+            logger.error("Auto-seed or publish failed: %s", e)
+
         raise HTTPException(
             status_code=404,
             detail="Catalogue not published yet. Please publish the catalogue from the Admin CMS.",
         )
+    except Exception as e:
+        logger.error("Unexpected error reading catalogue: %s", e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/search", summary="Composed Catalogue Search")
@@ -216,11 +231,33 @@ async def seed_catalogue(
     Seeds initial show data into the database and publishes catalogue.json immediately.
     Can be triggered anytime to restore sample data via browser or API.
     """
+    import traceback
     from fastapi.encoders import jsonable_encoder
     from app.services.seed_loader import load_seed_data
 
-    seed_res = await load_seed_data(db, force_reload=force)
-    pub_res = await publish_catalog(db, triggered_by="manual-seed")
+    try:
+        seed_res = await load_seed_data(db, force_reload=force)
+    except Exception as e:
+        logger.error("seed_loader failed: %s", e)
+        return {
+            "success": False,
+            "error_step": "load_seed_data",
+            "error": str(e),
+            "traceback": traceback.format_exc(),
+        }
+
+    try:
+        pub_res = await publish_catalog(db, triggered_by="manual-seed")
+    except Exception as e:
+        logger.error("publish_catalog failed: %s", e)
+        return {
+            "success": False,
+            "seed_result": seed_res,
+            "error_step": "publish_catalog",
+            "error": str(e),
+            "traceback": traceback.format_exc(),
+        }
+
     _catalog_cache.clear()
     return {
         "success": True,
