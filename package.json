@@ -1,0 +1,8 @@
+{
+  "name": "peblo-tv-mini",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cd viewer-ui && npm run build"
+  }
+}
